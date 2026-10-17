@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Management | StudentIQ</title>
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/Teacher_CSS/teacher_sidebar.css') }}">
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/Teacher_CSS/teacher_attendance.css') }}">
+    <style>
+        .row-highlighted {
+            background-color: #f0fdf4 !important;
+            border-left: 4px solid #10b981 !important;
+            transition: background-color 0.5s ease;
+        }
+        .row-highlighted td {
+            background-color: #f0fdf4 !important;
+        }
+        .just-marked-badge {
+            background: #ecfdf5;
+            color: #047857;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border: 1px solid #a7f3d0;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+<div class="teacher-layout">
+
+    <!-- SIDEBAR -->
+    {% include 'Teacher/teacher_sidebar.html' %}
+
+    <!-- MAIN CONTENT -->
+    <main class="teacher-main">
+
+        <!-- TOP BAR -->
+        <header class="topbar">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text"
+                       id="topSearchInput"
+                       placeholder="Search attendance records...">
+            </div>
+
+            <div class="topbar-right">
+                <div class="teacher-profile">
+                    <div class="teacher-avatar" style="overflow: hidden; border-radius: 50%;">
+                        {% if current_avatar %}
+                            <img src="{{ current_avatar }}" alt="Faculty" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% elif teacher and teacher.profile_pic %}
+                            <img src="{{ url_for('static', filename=teacher.profile_pic) }}" alt="Faculty" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            <i class="bi bi-person"></i>
+                        {% endif %}
+                    </div>
+                    <div class="teacher-info">
+                        <strong>{{ teacher.name if teacher else "Faculty" }}</strong>
+                        <span>Faculty Member</span>
+                    </div>
+                    <i class="bi bi-chevron-down profile-arrow"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- FLASHED MESSAGES -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div style="padding: 13px 20px; margin: 15px 0 20px; border-radius: 10px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 10px; background: {% if category == 'success' %}#ecfdf5; color: #065f46; border: 1px solid #a7f3d0;{% elif category == 'danger' %}#fef2f2; color: #991b1b; border: 1px solid #fecaca;{% else %}#fffbeb; color: #92400e; border: 1px solid #fde68a;{% endif %}">
+                        <i class="bi bi-info-circle-fill"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- PAGE HEADING -->
+        <section class="page-heading">
+            <div>
+                <span class="page-label">FACULTY ACADEMIC PORTAL</span>
+                <h1>Attendance Management</h1>
+                <p>Track, manage, and record student course attendance &amp; identify attendance shortages.</p>
+            </div>
+
+            <div class="heading-actions" style="display: flex; gap: 10px;">
+                <button class="primary-btn" onclick="openMarkClassModal()" style="background: #10b981; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);">
+                    <i class="bi bi-calendar-check-fill"></i>
+                    Mark Class Attendance
+                </button>
+                <button class="primary-btn" onclick="openAddModal()">
+                    <i class="bi bi-plus-lg"></i>
+                    Add Subject Record
+                </button>
+            </div>
+        </section>
+
+        <!-- KPI STATS CARDS -->
+        <section class="kpi-grid">
+            <!-- Overall Average -->
+            <div class="kpi-card">
+                <div class="kpi-icon blue">
+                    <i class="bi bi-percent"></i>
+                </div>
+                <div class="kpi-info">
+                    <span>Average Attendance</span>
+                    <strong>{{ avg_overall }}%</strong>
+                    <small>Overall across courses</small>
+                </div>
+            </div>
+
+            <!-- Regular Attendance -->
+            <div class="kpi-card">
+                <div class="kpi-icon green">
+                    <i class="bi bi-check2-circle"></i>
+                </div>
+                <div class="kpi-info">
+                    <span>Regular (&ge; 85%)</span>
+                    <strong>{{ high_att_count }}</strong>
+                    <small>High compliance</small>
+                </div>
+            </div>
+
+            <!-- Moderate Attendance -->
+            <div class="kpi-card">
+                <div class="kpi-icon amber">
+                    <i class="bi bi-exclamation-circle"></i>
+                </div>
+                <div class="kpi-info">
+                    <span>Moderate (75–84%)</span>
+                    <strong>{{ mod_att_count }}</strong>
+                    <small>Acceptable limit</small>
+                </div>
+            </div>
+
+            <!-- Attendance Shortage -->
+            <div class="kpi-card">
+                <div class="kpi-icon red">
+                    <i class="bi bi-x-octagon"></i>
+                </div>
+                <div class="kpi-info">
+                    <span>Shortage (&lt; 75%)</span>
+                    <strong>{{ low_att_count }}</strong>
+                    <small>Require intervention</small>
+                </div>
+            </div>
+        </section>
+
+        <!-- ATTENDANCE TABLE CARD -->
+        <section class="attendance-card">
+            <!-- CARD HEADER & FILTERS -->
+            <div class="card-header-bar">
+                <div>
+                    <h2>Student Attendance Records</h2>
+                    <p>Total of {{ attendance_records|length }} record(s) found</p>
+                </div>
+
+                <form method="GET" action="{{ url_for('teacher_attendance') }}" class="filters-bar">
+                    <div class="filter-input-wrap">
+                        <i class="bi bi-search"></i>
+                        <input type="text"
+                               name="search"
+                               placeholder="Filter by name, email, or subject..."
+                               value="{{ search_query }}">
+                    </div>
+
+                    <select name="department" class="filter-select">
+                        <option value="">All Departments</option>
+                        {% for d in departments %}
+                            <option value="{{ d }}" {% if selected_dept == d %}selected{% endif %}>{{ d }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <select name="semester" class="filter-select">
+                        <option value="">All Semesters</option>
+                        {% for sem in semesters %}
+                            <option value="{{ sem }}" {% if selected_sem == sem|string %}selected{% endif %}>Sem {{ sem }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <button type="submit" class="filter-btn">
+                        <i class="bi bi-funnel"></i>
+                        Filter
+                    </button>
+
+                    {% if search_query or selected_dept or selected_sem %}
+                        <a href="{{ url_for('teacher_attendance') }}" class="filter-btn reset-btn">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                            Reset
+                        </a>
+                    {% endif %}
+                </form>
+            </div>
+
+            <!-- TABLE CONTENT -->
+            <div class="attendance-table-wrap">
+                {% if attendance_records %}
+                    <table class="attendance-table">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Department &amp; Sem</th>
+                                <th>Subject</th>
+                                <th>Attended / Total</th>
+                                <th>Attendance %</th>
+                                <th>Status</th>
+                                <th style="text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rec in attendance_records %}
+                                {% set is_marked_target = (highlight_id and rec.attendance_id == highlight_id) or (highlight_subject and rec.subject == highlight_subject) %}
+                                <tr class="{% if is_marked_target %}row-highlighted{% endif %}" id="attendance-row-{{ rec.attendance_id }}">
+                                    <td>
+                                        <div class="student-cell">
+                                            <div class="student-avatar-circle">
+                                                {{ rec.student_name[:2].upper() }}
+                                            </div>
+                                            <div class="student-details-box">
+                                                <div style="display: flex; align-items: center; gap: 6px;">
+                                                    <strong>{{ rec.student_name }}</strong>
+                                                    {% if is_marked_target %}
+                                                        <span class="just-marked-badge">
+                                                            <i class="bi bi-clock-history"></i> Just Marked
+                                                        </span>
+                                                    {% endif %}
+                                                </div>
+                                                <span>{{ rec.student_email }}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <strong>{{ rec.department }}</strong>
+                                        <div style="font-size: 11px; color: #85889a;">Semester {{ rec.semester }}</div>
+                                    </td>
+
+                                    <td>
+                                        <span class="subject-pill">{{ rec.subject }}</span>
+                                    </td>
+
+                                    <td>
+                                        <strong>{{ rec.attended_classes }}</strong>
+                                        <span style="color: #9ca3af;"> / {{ rec.total_classes }} classes</span>
+                                    </td>
+
+                                    <td>
+                                        <div class="progress-box">
+                                            <div class="progress-track">
+                                                <div class="progress-fill {% if rec.percentage >= 85 %}good{% elif rec.percentage >= 75 %}average{% else %}danger{% endif %}"
+                                                     style="width: {{ rec.percentage }}%;"></div>
+                                            </div>
+                                            <span class="progress-text" style="color: {% if rec.percentage >= 85 %}#15803d{% elif rec.percentage >= 75 %}#b45309{% else %}#b91c1c{% endif %};">
+                                                {{ rec.percentage }}%
+                                            </span>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        {% if rec.percentage >= 85 %}
+                                            <span class="status-badge good">
+                                                <i class="bi bi-check-circle-fill"></i> Regular
+                                            </span>
+                                        {% elif rec.percentage >= 75 %}
+                                            <span class="status-badge average">
+                                                <i class="bi bi-dash-circle-fill"></i> Acceptable
+                                            </span>
+                                        {% else %}
+                                            <span class="status-badge danger">
+                                                <i class="bi bi-exclamation-triangle-fill"></i> Shortage
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td style="text-align: right;">
+                                        <div class="action-group" style="justify-content: flex-end; gap: 5px;">
+                                            <!-- Mark Present -->
+                                            <form method="POST" action="{{ url_for('teacher_attendance_mark_single') }}" style="display: inline;">
+                                                <input type="hidden" name="attendance_id" value="{{ rec.attendance_id }}">
+                                                <input type="hidden" name="status" value="present">
+                                                <button type="submit"
+                                                        class="action-btn"
+                                                        title="Mark Present (+1 Attended / +1 Total)"
+                                                        style="color: #15803d; background: #ecfdf5; border-color: #a7f3d0;">
+                                                    <i class="bi bi-check-lg" style="font-weight: 700;"></i>
+                                                </button>
+                                            </form>
+
+                                            <!-- Mark Absent -->
+                                            <form method="POST" action="{{ url_for('teacher_attendance_mark_single') }}" style="display: inline;">
+                                                <input type="hidden" name="attendance_id" value="{{ rec.attendance_id }}">
+                                                <input type="hidden" name="status" value="absent">
+                                                <button type="submit"
+                                                        class="action-btn"
+                                                        title="Mark Absent (+0 Attended / +1 Total)"
+                                                        style="color: #b91c1c; background: #fef2f2; border-color: #fecaca;">
+                                                    <i class="bi bi-x-lg" style="font-weight: 700;"></i>
+                                                </button>
+                                            </form>
+
+                                            <!-- Edit Record -->
+                                            <button type="button"
+                                                    class="action-btn edit-btn"
+                                                    title="Edit Attendance"
+                                                    onclick="openEditModal({{ rec.attendance_id }}, '{{ rec.student_name|escape }}', '{{ rec.subject|escape }}', {{ rec.total_classes }}, {{ rec.attended_classes }})">
+                                                <i class="bi bi-pencil-fill"></i>
+                                            </button>
+
+                                            <!-- Delete Record -->
+                                            <form method="POST"
+                                                  action="{{ url_for('teacher_attendance_delete', attendance_id=rec.attendance_id) }}"
+                                                  style="display: inline;"
+                                                  onsubmit="return confirm('Are you sure you want to delete this attendance record?');">
+                                                <button type="submit"
+                                                        class="action-btn delete-btn"
+                                                        title="Delete Record">
+                                                    <i class="bi bi-trash3-fill"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="bi bi-calendar-x"></i>
+                        <h4>No Attendance Records Found</h4>
+                        <p>No student attendance records match the current filter criteria or none have been added yet.</p>
+                        <button class="primary-btn" onclick="openAddModal()" style="margin-top: 15px;">
+                            <i class="bi bi-plus-lg"></i>
+                            Record New Attendance
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- =========================================================
+     MODAL: ADD ATTENDANCE RECORD
+     ========================================================= -->
+<div class="modal-overlay" id="addAttendanceModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>
+                <i class="bi bi-calendar-plus" style="color: #5b3df5;"></i>
+                Record Attendance
+            </h3>
+            <button class="close-modal-btn" onclick="closeAddModal()">&times;</button>
+        </div>
+
+        <form method="POST" action="{{ url_for('teacher_attendance_add') }}" id="addAttendanceForm">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Select Student *</label>
+                    <select name="student_id" class="form-control" required>
+                        <option value="">-- Select Student --</option>
+                        {% for s in students %}
+                            <option value="{{ s.id }}">{{ s.name }} ({{ s.department }} • Sem {{ s.semester }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Subject / Course Name *</label>
+                    <input type="text"
+                           name="subject"
+                           class="form-control"
+                           placeholder="e.g. Python Programming"
+                           list="subjectSuggestions"
+                           required>
+                    <datalist id="subjectSuggestions">
+                        <option value="Python Programming">
+                        <option value="Database Management">
+                        <option value="Data Science">
+                        <option value="Big Data Analytics">
+                        <option value="Statistics">
+                        <option value="Machine Learning">
+                        <option value="Cloud Computing">
+                    </datalist>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                    <div class="form-group">
+                        <label>Total Classes Held *</label>
+                        <input type="number"
+                               id="addTotalClasses"
+                               name="total_classes"
+                               class="form-control"
+                               min="1"
+                               value="40"
+                               required
+                               oninput="calcAddPct()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Classes Attended *</label>
+                        <input type="number"
+                               id="addAttendedClasses"
+                               name="attended_classes"
+                               class="form-control"
+                               min="0"
+                               value="35"
+                               required
+                               oninput="calcAddPct()">
+                    </div>
+                </div>
+
+                <div class="calc-preview">
+                    <span>Calculated Attendance:</span>
+                    <strong id="addPctDisplay">87.5% (Regular)</strong>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeAddModal()">Cancel</button>
+                <button type="submit" class="btn-primary">Save Attendance</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- =========================================================
+     MODAL: EDIT ATTENDANCE RECORD
+     ========================================================= -->
+<div class="modal-overlay" id="editAttendanceModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>
+                <i class="bi bi-pencil-square" style="color: #5b3df5;"></i>
+                Update Attendance
+            </h3>
+            <button class="close-modal-btn" onclick="closeEditModal()">&times;</button>
+        </div>
+
+        <form method="POST" action="{{ url_for('teacher_attendance_update') }}" id="editAttendanceForm">
+            <input type="hidden" name="attendance_id" id="editAttendanceId">
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Student</label>
+                    <input type="text"
+                           id="editStudentName"
+                           class="form-control"
+                           readonly
+                           style="background: #f8f9fa; color: #4b5563;">
+                </div>
+
+                <div class="form-group">
+                    <label>Subject / Course Name *</label>
+                    <input type="text"
+                           id="editSubject"
+                           name="subject"
+                           class="form-control"
+                           required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                    <div class="form-group">
+                        <label>Total Classes Held *</label>
+                        <input type="number"
+                               id="editTotalClasses"
+                               name="total_classes"
+                               class="form-control"
+                               min="1"
+                               required
+                               oninput="calcEditPct()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Classes Attended *</label>
+                        <input type="number"
+                               id="editAttendedClasses"
+                               name="attended_classes"
+                               class="form-control"
+                               min="0"
+                               required
+                               oninput="calcEditPct()">
+                    </div>
+                </div>
+
+                <div class="calc-preview">
+                    <span>Recalculated Attendance:</span>
+                    <strong id="editPctDisplay">0.0%</strong>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeEditModal()">Cancel</button>
+                <button type="submit" class="btn-primary">Update Record</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- =========================================================
+     MODAL: MARK CLASS ATTENDANCE
+     ========================================================= -->
+<div class="modal-overlay" id="markClassModal">
+    <div class="modal-content" style="max-width: 650px;">
+        <div class="modal-header">
+            <h3>
+                <i class="bi bi-calendar-check" style="color: #0ea5e9;"></i>
+                Mark Class Attendance Session
+            </h3>
+            <button class="close-modal-btn" onclick="closeMarkClassModal()">&times;</button>
+        </div>
+
+        <form method="POST" action="{{ url_for('teacher_attendance_mark_class') }}" id="markClassForm">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Subject / Course Name *</label>
+                    <input type="text"
+                           name="subject"
+                           class="form-control"
+                           placeholder="e.g. Data Structures, Machine Learning"
+                           required
+                           list="existingSubjectsList">
+                    <datalist id="existingSubjectsList">
+                        {% set subjects_seen = [] %}
+                        {% for r in attendance_records %}
+                            {% if r.subject and r.subject not in subjects_seen %}
+                                {% set _ = subjects_seen.append(r.subject) %}
+                                <option value="{{ r.subject }}"></option>
+                            {% endif %}
+                        {% endfor %}
+                    </datalist>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <label style="font-weight: 600; color: #1e293b; margin-bottom: 0;">Select Present Students:</label>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="setAllPresent(true)">Mark All Present</button>
+                        <button type="button" class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="setAllPresent(false)">Mark All Absent</button>
+                    </div>
+                </div>
+
+                <div style="max-height: 280px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #fafbfc;">
+                    {% if students %}
+                        {% for s in students %}
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border-bottom: 1px solid #f1f5f9;">
+                                <input type="hidden" name="all_student_ids" value="{{ s.id }}">
+                                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-bottom: 0; flex: 1;">
+                                    <input type="checkbox" name="present_student_ids" value="{{ s.id }}" checked class="class-student-checkbox">
+                                    <span style="font-weight: 500; color: #1e293b;">{{ s.name }}</span>
+                                    <span style="font-size: 11px; color: #64748b;">({{ s.department }} - Sem {{ s.semester }})</span>
+                                </label>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p style="color: #64748b; font-size: 13px; text-align: center; margin: 10px 0;">No students available. Please add students first.</p>
+                    {% endif %}
+                </div>
+                <div style="margin-top: 10px; font-size: 12px; color: #64748b;">
+                    Checked students will have their attended classes incremented (+1) out of total classes (+1). Unchecked students will have total classes incremented (+1) as absent.
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeMarkClassModal()">Cancel</button>
+                <button type="submit" class="btn-primary" style="background: #0ea5e9;">Submit Class Attendance</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openAddModal() {
+    document.getElementById('addAttendanceModal').classList.add('active');
+    calcAddPct();
+}
+
+function closeAddModal() {
+    document.getElementById('addAttendanceModal').classList.remove('active');
+}
+
+function openMarkClassModal() {
+    document.getElementById('markClassModal').classList.add('active');
+}
+
+function closeMarkClassModal() {
+    document.getElementById('markClassModal').classList.remove('active');
+}
+
+function setAllPresent(val) {
+    document.querySelectorAll('.class-student-checkbox').forEach(cb => cb.checked = val);
+}
+
+function calcAddPct() {
+    const total = parseFloat(document.getElementById('addTotalClasses').value) || 0;
+    const attended = parseFloat(document.getElementById('addAttendedClasses').value) || 0;
+    const display = document.getElementById('addPctDisplay');
+
+    if (total <= 0) {
+        display.innerText = '0.0%';
+        display.style.color = '#dc2626';
+        return;
+    }
+
+    const pct = Math.min(100, Math.max(0, (attended / total) * 100)).toFixed(1);
+    let label = pct >= 85 ? 'Regular' : (pct >= 75 ? 'Acceptable' : 'Shortage');
+    display.innerText = `${pct}% (${label})`;
+    display.style.color = pct >= 85 ? '#16a34a' : (pct >= 75 ? '#d97706' : '#dc2626');
+}
+
+function openEditModal(id, studentName, subject, total, attended) {
+    document.getElementById('editAttendanceId').value = id;
+    document.getElementById('editStudentName').value = studentName;
+    document.getElementById('editSubject').value = subject;
+    document.getElementById('editTotalClasses').value = total;
+    document.getElementById('editAttendedClasses').value = attended;
+
+    document.getElementById('editAttendanceModal').classList.add('active');
+    calcEditPct();
+}
+
+function closeEditModal() {
+    document.getElementById('editAttendanceModal').classList.remove('active');
+}
+
+function calcEditPct() {
+    const total = parseFloat(document.getElementById('editTotalClasses').value) || 0;
+    const attended = parseFloat(document.getElementById('editAttendedClasses').value) || 0;
+    const display = document.getElementById('editPctDisplay');
+
+    if (total <= 0) {
+        display.innerText = '0.0%';
+        display.style.color = '#dc2626';
+        return;
+    }
+
+    const pct = Math.min(100, Math.max(0, (attended / total) * 100)).toFixed(1);
+    let label = pct >= 85 ? 'Regular' : (pct >= 75 ? 'Acceptable' : 'Shortage');
+    display.innerText = `${pct}% (${label})`;
+    display.style.color = pct >= 85 ? '#16a34a' : (pct >= 75 ? '#d97706' : '#dc2626');
+}
+
+// Quick filter via top search input
+const topAttSearch = document.getElementById('topSearchInput');
+if (topAttSearch) {
+    topAttSearch.addEventListener('input', function(e) {
+        const term = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('.attendance-table tbody tr');
+        rows.forEach(r => {
+            const text = r.innerText.toLowerCase();
+            r.style.display = text.includes(term) ? '' : 'none';
+        });
+    });
+}
+</script>
+
+</body>
+</html>

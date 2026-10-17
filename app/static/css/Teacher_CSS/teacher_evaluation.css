@@ -1,0 +1,982 @@
+/* =====================================================
+   TEACHER EVALUATION PAGE
+===================================================== */
+
+
+/* =====================================================
+   MAIN
+===================================================== */
+
+.teacher-main {
+
+    margin-left: 260px;
+
+    min-height: 100vh;
+
+    padding: 0 28px 40px;
+
+    background: #f7f8fc;
+
+}
+
+
+/* =====================================================
+   TOP BAR
+===================================================== */
+
+.topbar {
+
+    height: 76px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 25px;
+
+}
+
+
+.search-box {
+
+    width: 390px;
+
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    background: #fff;
+
+    border: 1px solid #e8e9f0;
+
+    border-radius: 10px;
+
+    padding: 0 14px;
+
+    color: #9295a5;
+
+}
+
+
+.search-box input {
+
+    width: 100%;
+
+    border: none;
+
+    outline: none;
+
+    background: transparent;
+
+    font-size: 13px;
+
+}
+
+
+.topbar-right {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+}
+
+
+.icon-btn {
+
+    position: relative;
+
+    width: 38px;
+
+    height: 38px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border: 1px solid #e9e9f0;
+
+    border-radius: 10px;
+
+    background: #fff;
+
+    color: #55586b;
+
+}
+
+
+.notification-dot {
+
+    position: absolute;
+
+    width: 7px;
+
+    height: 7px;
+
+    top: 7px;
+
+    right: 8px;
+
+    border-radius: 50%;
+
+    background: #ff5a68;
+
+}
+
+
+.teacher-profile {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+}
+
+
+.teacher-avatar {
+
+    width: 40px;
+
+    height: 40px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #ece8ff;
+
+    color: #5b3df5;
+
+}
+
+
+.teacher-info {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 2px;
+
+}
+
+
+.teacher-info strong {
+
+    font-size: 13px;
+
+}
+
+
+.teacher-info span {
+
+    font-size: 11px;
+
+    color: #9294a3;
+
+}
+
+
+/* =====================================================
+   PAGE HEADING
+===================================================== */
+
+.page-heading {
+
+    margin-bottom: 20px;
+
+}
+
+
+.page-heading h1 {
+
+    font-size: 24px;
+
+    font-weight: 700;
+
+    color: #20202e;
+
+    margin-bottom: 5px;
+
+}
+
+
+.page-heading p {
+
+    font-size: 13px;
+
+    color: #8a8d9c;
+
+}
+
+
+/* =====================================================
+   STAT CARDS
+===================================================== */
+
+.evaluation-stats {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 15px;
+
+    margin-bottom: 18px;
+
+}
+
+
+.evaluation-stat-card {
+
+    min-height: 105px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    padding: 18px;
+
+    background: #fff;
+
+    border: 1px solid #e9e9f0;
+
+    border-radius: 13px;
+
+}
+
+
+.stat-icon {
+
+    width: 44px;
+
+    height: 44px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 11px;
+
+    font-size: 18px;
+
+}
+
+
+.stat-icon.purple {
+
+    background: #eeeaff;
+
+    color: #6547e8;
+
+}
+
+
+.stat-icon.green {
+
+    background: #e5f7ef;
+
+    color: #26946c;
+
+}
+
+
+.stat-icon.yellow {
+
+    background: #fff4da;
+
+    color: #c58b1c;
+
+}
+
+
+.stat-icon.blue {
+
+    background: #e8f1ff;
+
+    color: #2878e9;
+
+}
+
+
+.evaluation-stat-card div:last-child {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 2px;
+
+}
+
+
+.evaluation-stat-card span {
+
+    font-size: 10px;
+
+    color: #858795;
+
+}
+
+
+.evaluation-stat-card strong {
+
+    font-size: 22px;
+
+    color: #292a39;
+
+}
+
+
+.evaluation-stat-card small {
+
+    font-size: 9px;
+
+    color: #a0a1ac;
+
+}
+
+
+/* =====================================================
+   CARD
+===================================================== */
+
+.evaluation-card {
+
+    background: #fff;
+
+    border: 1px solid #e9e9f0;
+
+    border-radius: 13px;
+
+    padding: 20px;
+
+    margin-bottom: 18px;
+
+}
+
+
+.card-heading {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: space-between;
+
+    margin-bottom: 18px;
+
+}
+
+
+.card-heading h3 {
+
+    font-size: 14px;
+
+    color: #292a39;
+
+    margin-bottom: 4px;
+
+}
+
+
+.card-heading p {
+
+    font-size: 10px;
+
+    color: #9a9ca9;
+
+}
+
+
+.form-status {
+
+    padding: 5px 10px;
+
+    border-radius: 20px;
+
+    background: #fff4da;
+
+    color: #c58b1c;
+
+    font-size: 9px;
+
+    font-weight: 600;
+
+}
+
+
+/* =====================================================
+   SELECT STUDENT
+===================================================== */
+
+.evaluation-select-row {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr
+        1fr
+        auto;
+
+    align-items: end;
+
+    gap: 14px;
+
+}
+
+
+.select-group {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+
+}
+
+
+.select-group label {
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+    color: #555765;
+
+}
+
+
+.select-group select {
+
+    height: 42px;
+
+    padding: 0 12px;
+
+    border: 1px solid #e3e3eb;
+
+    border-radius: 8px;
+
+    outline: none;
+
+    background: #fff;
+
+    color: #676978;
+
+    font-size: 11px;
+
+}
+
+
+.start-btn {
+
+    height: 42px;
+
+    padding: 0 17px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 7px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: #5b3df5;
+
+    color: #fff;
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+}
+
+
+/* =====================================================
+   SELECTED STUDENT
+===================================================== */
+
+.selected-student {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 13px;
+
+    margin-bottom: 22px;
+
+    background: #f8f7ff;
+
+    border: 1px solid #ece9ff;
+
+    border-radius: 10px;
+
+}
+
+
+.selected-avatar {
+
+    width: 40px;
+
+    height: 40px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #e9e3ff;
+
+    color: #5b3df5;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+}
+
+
+.selected-student div:last-child {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 3px;
+
+}
+
+
+.selected-student strong {
+
+    font-size: 12px;
+
+    color: #343543;
+
+}
+
+
+.selected-student span {
+
+    font-size: 9px;
+
+    color: #9294a3;
+
+}
+
+
+/* =====================================================
+   EVALUATION SECTION
+===================================================== */
+
+.evaluation-section {
+
+    padding: 20px 0;
+
+    border-top: 1px solid #f0f0f4;
+
+}
+
+
+.section-title {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    margin-bottom: 17px;
+
+}
+
+
+.section-number {
+
+    width: 32px;
+
+    height: 32px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: #eeeaff;
+
+    color: #5b3df5;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+}
+
+
+.section-title h4 {
+
+    font-size: 12px;
+
+    color: #343543;
+
+    margin-bottom: 3px;
+
+}
+
+
+.section-title p {
+
+    font-size: 9px;
+
+    color: #999ba7;
+
+}
+
+
+/* =====================================================
+   RATINGS
+===================================================== */
+
+.rating-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 14px;
+
+}
+
+
+.rating-item {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+
+}
+
+
+.rating-item label {
+
+    font-size: 10px;
+
+    font-weight: 500;
+
+    color: #656776;
+
+}
+
+
+.rating-item select {
+
+    height: 40px;
+
+    padding: 0 11px;
+
+    border: 1px solid #e3e3eb;
+
+    border-radius: 8px;
+
+    outline: none;
+
+    background: #fff;
+
+    color: #555765;
+
+    font-size: 10px;
+
+}
+
+
+/* =====================================================
+   FEEDBACK
+===================================================== */
+
+.feedback-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 15px;
+
+}
+
+
+.feedback-group {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+
+}
+
+
+.feedback-group.full {
+
+    grid-column: 1 / -1;
+
+}
+
+
+.feedback-group label {
+
+    font-size: 10px;
+
+    font-weight: 500;
+
+    color: #656776;
+
+}
+
+
+.feedback-group textarea {
+
+    min-height: 100px;
+
+    resize: vertical;
+
+    padding: 11px;
+
+    border: 1px solid #e3e3eb;
+
+    border-radius: 8px;
+
+    outline: none;
+
+    font-family: 'Poppins', sans-serif;
+
+    font-size: 10px;
+
+    color: #444552;
+
+}
+
+
+.feedback-group textarea::placeholder {
+
+    color: #aaaab4;
+
+}
+
+
+/* =====================================================
+   ACTIONS
+===================================================== */
+
+.form-actions {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    padding-top: 20px;
+
+    border-top: 1px solid #f0f0f4;
+
+}
+
+
+.save-draft,
+.submit-evaluation {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 10px 15px;
+
+    border-radius: 8px;
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+}
+
+
+.save-draft {
+
+    border: 1px solid #e2e2ea;
+
+    background: #fff;
+
+    color: #626473;
+
+}
+
+
+.submit-evaluation {
+
+    border: none;
+
+    background: #5b3df5;
+
+    color: #fff;
+
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 1100px) {
+
+    .evaluation-stats {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
+    }
+
+}
+
+
+@media (max-width: 800px) {
+
+    .teacher-main {
+
+        margin-left: 230px;
+
+        padding: 0 18px 30px;
+
+    }
+
+
+    .topbar {
+
+        height: auto;
+
+        padding: 15px 0;
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+    }
+
+
+    .search-box {
+
+        width: 100%;
+
+    }
+
+
+    .topbar-right {
+
+        justify-content: flex-end;
+
+    }
+
+
+    .evaluation-select-row {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .rating-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .feedback-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .feedback-group.full {
+
+        grid-column: auto;
+
+    }
+
+}
+
+
+@media (max-width: 550px) {
+
+    .evaluation-stats {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .form-actions {
+
+        flex-direction: column;
+
+    }
+
+
+    .save-draft,
+    .submit-evaluation {
+
+        width: 100%;
+
+        justify-content: center;
+
+    }
+
+}

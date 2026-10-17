@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Settings | StudentIQ</title>
+
+
+    <!-- Google Font -->
+
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- Bootstrap Icons -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    >
+
+
+    <!-- Existing Sidebar -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/Student_CSS/sidebar.css') }}"
+    >
+
+
+    <!-- Settings -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/Student_CSS/settings.css') }}"
+    >
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/Student_CSS/notifications.css') }}"
+    >
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    {% include 'Student/sidebar.html' %}
+
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
+
+    <main class="settings-main">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div style="padding: 14px 20px; margin-bottom: 20px; border-radius: 12px; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; background: {% if category == 'success' %}#ecfdf5; color: #065f46; border: 1px solid #a7f3d0{% elif category == 'danger' %}#fef2f2; color: #991b1b; border: 1px solid #fecaca{% else %}#fffbeb; color: #92400e; border: 1px solid #fde68a{% endif %};">
+                        <i class="bi bi-info-circle-fill"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+
+        <!-- =================================================
+             PAGE HEADER
+        ================================================== -->
+
+        <section class="settings-header" style="display: flex; justify-content: space-between; align-items: center;">
+
+            <div>
+
+                <span class="settings-label">
+                    <i class="bi bi-gear-fill"></i>
+                    ACCOUNT SETTINGS
+                </span>
+
+                <h1>Settings</h1>
+
+                <p>
+                    Manage your StudentIQ account, preferences and notifications.
+                </p>
+
+            </div>
+
+            <div>
+                {% include 'Student/notifications_widget.html' %}
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             ACCOUNT CARD
+        ================================================== -->
+
+        <section class="account-card">
+
+
+            <!-- Account Top -->
+
+            <div class="account-top" style="align-items: center; flex-wrap: wrap; gap: 20px;">
+
+                <div class="account-profile" style="display: flex; align-items: center; gap: 20px;">
+
+                    <div class="profile-avatar-container" style="position: relative; width: 72px; height: 72px; flex-shrink: 0;">
+                        <div class="profile-avatar" style="width: 72px; height: 72px; border-radius: 20px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #6c63ff, #5b3df5); color: white; box-shadow: 0 8px 20px rgba(108, 99, 255, 0.25);">
+                            {% if student and student.profile_pic %}
+                                <img id="studentAvatarImg" src="{{ url_for('static', filename=student.profile_pic) }}" alt="{{ student.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            {% else %}
+                                <i id="studentAvatarIcon" class="bi bi-person-fill" style="font-size: 34px;"></i>
+                                <img id="studentAvatarImg" src="" alt="Avatar Preview" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                            {% endif %}
+                        </div>
+
+                        <!-- Camera badge button triggers file input -->
+                        <label for="studentProfilePicInput" title="Change profile photo" style="position: absolute; bottom: -4px; right: -4px; width: 28px; height: 28px; background: #6c63ff; border: 2px solid #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ffffff; cursor: pointer; font-size: 13px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); transition: transform 0.2s;">
+                            <i class="bi bi-camera-fill"></i>
+                        </label>
+                    </div>
+
+                    <div class="profile-details">
+
+                        <h2 id="profileName">{{ student.name if student else "Student User" }}</h2>
+
+                        <p>{{ student.department if student else "Student Account" }} (Sem {{ student.semester if student else 1 }})</p>
+
+                        <!-- Upload & Remove Buttons -->
+                        <div style="display: flex; gap: 10px; margin-top: 8px; align-items: center; flex-wrap: wrap;">
+                            <form id="studentAvatarForm" method="POST" action="{{ url_for('update_student_profile_pic') }}" enctype="multipart/form-data" style="margin: 0; display: inline-flex; align-items: center; gap: 8px;">
+                                <input type="file" id="studentProfilePicInput" name="profile_pic" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif" style="display: none;" onchange="handleStudentAvatarSelect(this)">
+                                <button type="button" onclick="document.getElementById('studentProfilePicInput').click();" style="padding: 6px 14px; font-size: 12px; font-weight: 600; border-radius: 8px; border: 1.5px solid #e2e8f0; background: #ffffff; color: #334155; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s;">
+                                    <i class="bi bi-upload"></i> Upload Photo
+                                </button>
+                            </form>
+
+                            {% if student and student.profile_pic %}
+                            <form method="POST" action="{{ url_for('remove_student_profile_pic') }}" style="margin: 0; display: inline;">
+                                <button type="submit" onclick="return confirm('Are you sure you want to remove your profile picture?');" style="padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: 8px; border: 1.5px solid #fee2e2; background: #fef2f2; color: #dc2626; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s;">
+                                    <i class="bi bi-trash3"></i> Remove
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="account-status">
+
+                    <span class="status-dot"></span>
+
+                    Active
+
+                </div>
+
+            </div>
+
+
+            <div class="card-divider"></div>
+
+
+            <!-- Account Form -->
+            <form method="POST" action="{{ url_for('update_student_settings') }}" enctype="multipart/form-data">
+                <div class="account-form">
+
+                    <div class="form-field">
+                        <label for="fullName">Full Name</label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-person"></i>
+                            <input type="text" id="fullName" name="name" value="{{ student.name if student else 'Student' }}" required>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="email">Email Address</label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-envelope"></i>
+                            <input type="email" id="email" name="email" value="{{ student.email if student else '' }}" required>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="department">Department</label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-building"></i>
+                            <input type="text" id="department" name="department" value="{{ student.department if student else 'MSc IT' }}" required>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="semester">Semester</label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-calendar3"></i>
+                            <input type="number" id="semester" name="semester" min="1" max="8" value="{{ student.semester if student else 1 }}" required>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="role">Role</label>
+                        <div class="input-wrapper">
+                            <i class="bi bi-person-badge"></i>
+                            <input type="text" id="role" value="Student" readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label>Account Status</label>
+                        <div class="active-field">
+                            <span class="status-dot"></span>
+                            Account Active
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Save -->
+                <div class="account-actions">
+                    <button class="save-btn" type="submit">
+                        <i class="bi bi-check-lg"></i>
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+
+        </section>
+
+
+
+        <!-- =================================================
+             BOTTOM GRID
+        ================================================== -->
+
+        <section class="settings-grid">
+
+
+            <!-- =================================================
+                 PREFERENCES
+            ================================================== -->
+
+            <div class="settings-card">
+
+
+                <div class="card-heading">
+
+                    <div class="heading-icon purple">
+
+                        <i class="bi bi-sliders"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h3>Preferences</h3>
+
+                        <p>
+                            Customize your dashboard experience
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="preference-list">
+
+
+                    <!-- Theme -->
+
+                    <div class="preference-row">
+
+                        <div class="preference-info">
+
+                            <div class="small-icon purple">
+
+                                <i class="bi bi-palette"></i>
+
+                            </div>
+
+                            <div>
+
+                                <strong>Dashboard Theme</strong>
+
+                                <span>Use the StudentIQ default theme</span>
+
+                            </div>
+
+                        </div>
+
+
+                        <span class="default-badge">
+                            Default
+                        </span>
+
+                    </div>
+
+
+
+                    <!-- Compact -->
+
+                    <div class="preference-row">
+
+                        <div class="preference-info">
+
+                            <div class="small-icon blue">
+
+                                <i class="bi bi-layout-text-window"></i>
+
+                            </div>
+
+                            <div>
+
+                                <strong>Compact View</strong>
+
+                                <span>Keep dashboard cards compact</span>
+
+                            </div>
+
+                        </div>
+
+
+                        <label class="toggle">
+
+                            <input
+                                type="checkbox"
+                                id="compactToggle"
+                                checked
+                            >
+
+                            <span class="toggle-slider"></span>
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 NOTIFICATIONS
+            ================================================== -->
+
+            <div class="settings-card">
+
+
+                <div class="card-heading">
+
+                    <div class="heading-icon orange">
+
+                        <i class="bi bi-bell-fill"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h3>Notifications</h3>
+
+                        <p>
+                            Control your StudentIQ alerts
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="preference-list">
+
+
+                    <!-- Performance -->
+
+                    <div class="preference-row">
+
+                        <div class="preference-info">
+
+                            <div class="small-icon green">
+
+                                <i class="bi bi-graph-up-arrow"></i>
+
+                            </div>
+
+                            <div>
+
+                                <strong>Performance Alerts</strong>
+
+                                <span>Get notified about performance changes</span>
+
+                            </div>
+
+                        </div>
+
+
+                        <label class="toggle">
+
+                            <input
+                                type="checkbox"
+                                id="performanceToggle"
+                                checked
+                            >
+
+                            <span class="toggle-slider"></span>
+
+                        </label>
+
+                    </div>
+
+
+
+                    <!-- Prediction -->
+
+                    <div class="preference-row">
+
+                        <div class="preference-info">
+
+                            <div class="small-icon purple">
+
+                                <i class="bi bi-cpu"></i>
+
+                            </div>
+
+                            <div>
+
+                                <strong>Prediction Updates</strong>
+
+                                <span>Receive prediction notifications</span>
+
+                            </div>
+
+                        </div>
+
+
+                        <label class="toggle">
+
+                            <input
+                                type="checkbox"
+                                id="predictionToggle"
+                                checked
+                            >
+
+                            <span class="toggle-slider"></span>
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             SECURITY CARD
+        ================================================== -->
+
+        <section class="security-card">
+
+
+            <div class="security-left">
+
+                <div class="heading-icon red">
+
+                    <i class="bi bi-shield-lock-fill"></i>
+
+                </div>
+
+
+                <div>
+
+                    <h3>Security</h3>
+
+                    <p>
+                        Manage your account security
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="security-actions">
+                <button
+                    class="secondary-btn"
+                    type="button"
+                    onclick="document.getElementById('passwordModal').style.display='flex'"
+                >
+                    <i class="bi bi-key-fill"></i>
+                    Change Password
+                </button>
+
+                <a
+                    href="{{ url_for('logout') }}"
+                    class="logout-btn"
+                    style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px; justify-content: center; background: #dc2626; color: #ffffff !important;"
+                >
+                    <i class="bi bi-box-arrow-right" style="color: #ffffff !important;"></i>
+                    <span style="color: #ffffff !important;">Logout</span>
+                </a>
+            </div>
+
+        </section>
+
+
+
+        <!-- PASSWORD MODAL -->
+        <div id="passwordModal" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+            <div style="background: white; border-radius: 16px; width: 100%; max-width: 440px; padding: 28px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); position: relative;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="margin: 0; font-size: 18px; font-weight: 600; color: #1e293b;">Change Password</h3>
+                    <button type="button" onclick="document.getElementById('passwordModal').style.display='none'" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b;">&times;</button>
+                </div>
+                <form method="POST" action="{{ url_for('update_student_password') }}">
+                    <div style="margin-bottom: 14px;">
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Current Password</label>
+                        <input type="password" name="current_password" required style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                    <div style="margin-bottom: 14px;">
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">New Password</label>
+                        <input type="password" name="new_password" required style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Confirm New Password</label>
+                        <input type="password" name="confirm_password" required style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                        <button type="button" onclick="document.getElementById('passwordModal').style.display='none'" style="padding: 10px 18px; border-radius: 8px; border: 1px solid #cbd5e1; background: #f8fafc; font-weight: 500; cursor: pointer;">Cancel</button>
+                        <button type="submit" style="padding: 10px 20px; border-radius: 8px; border: none; background: #4f46e5; color: white; font-weight: 600; cursor: pointer;">Update Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+
+
+    <!-- Settings JS -->
+
+    <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+    <script>
+    function handleStudentAvatarSelect(input) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById('studentAvatarImg');
+                const icon = document.getElementById('studentAvatarIcon');
+                if (icon) icon.style.display = 'none';
+                if (img) {
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                }
+                // Submit form to upload immediately
+                document.getElementById('studentAvatarForm').submit();
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const logoutBtn = document.getElementById("logoutBtn");
+        if (logoutBtn) {
+            logoutBtn.addEventListener("click", function () {
+                const confirmLogout = confirm("Are you sure you want to logout?");
+                if (confirmLogout) {
+                    window.location.href = "{{ url_for('login') }}";
+                }
+            });
+        }
+    });
+    </script>
+
+</body>
+
+</html>

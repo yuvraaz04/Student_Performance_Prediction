@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports | StudentIQ</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Sidebar CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Student_CSS/sidebar.css') }}">
+
+    <!-- Reports CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Student_CSS/reports.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Student_CSS/notifications.css') }}">
+    <style>
+        .flash-msg {
+            padding: 14px 20px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .flash-success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+        .flash-warning { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+        .flash-danger { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+        .action-btn { text-decoration: none; }
+    </style>
+</head>
+
+<body>
+
+    {% include 'Student/sidebar.html' %}
+
+    <main class="main-content">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-msg flash-{{ category }}">
+                        <i class="bi bi-info-circle-fill"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- PAGE HEADER -->
+        <section class="reports-header">
+            <div class="header-text">
+                <span class="page-label">
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+                    REPORT CENTER
+                </span>
+                <h1>Reports</h1>
+                <p>
+                    View student performance and academic evaluation summaries.
+                </p>
+            </div>
+
+            <div style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
+                {% include 'Student/notifications_widget.html' %}
+
+                <!-- Profile -->
+                <div class="student-profile" style="display: flex; align-items: center; gap: 8px;">
+                    <div class="profile-avatar" style="overflow: hidden; border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #6c63ff, #5b3df5); color: white;">
+                        {% if current_avatar %}
+                            <img src="{{ current_avatar }}" alt="{{ student.name if student else 'Student' }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% elif student and student.profile_pic %}
+                            <img src="{{ url_for('static', filename=student.profile_pic) }}" alt="{{ student.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            <i class="bi bi-person-fill" style="font-size: 18px;"></i>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <a href="{{ url_for('student_export_faculty_report') }}" class="generate-btn" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;" title="Export Faculty Report (PDF)">
+                    <i class="bi bi-download"></i>
+                    <span>Export Report</span>
+                </a>
+                <a href="{{ url_for('student_export_faculty_report', format='csv') }}" class="generate-btn" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px; background: #ffffff; color: #5B3DF5; border: 1.5px solid #5B3DF5; box-shadow: none;" title="Export Faculty Report (CSV)">
+                    <i class="bi bi-file-earmark-spreadsheet"></i>
+                    <span>Export CSV</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- REPORT SUMMARY CARDS -->
+        <section class="report-stats">
+            <div class="report-stat-card">
+                <div class="stat-icon purple">
+                    <i class="bi bi-file-earmark-text-fill"></i>
+                </div>
+                <div class="stat-content">
+                    <span>Total Reports</span>
+                    <h2>{{ total_reports|default(0) }}</h2>
+                    <small>
+                        <i class="bi bi-arrow-up"></i>
+                        Generated reports
+                    </small>
+                </div>
+            </div>
+
+            <div class="report-stat-card">
+                <div class="stat-icon blue">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <div class="stat-content">
+                    <span>Performance Reports</span>
+                    <h2>{{ performance_reports|default(0) }}</h2>
+                    <small>Academic performance</small>
+                </div>
+            </div>
+
+            <div class="report-stat-card">
+                <div class="stat-icon orange">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+                <div class="stat-content">
+                    <span>Risk Reports</span>
+                    <h2>{{ risk_reports|default(0) }}</h2>
+                    <small>At-risk assessments</small>
+                </div>
+            </div>
+
+            <div class="report-stat-card">
+                <div class="stat-icon green">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <div class="stat-content">
+                    <span>Latest Activity</span>
+                    <h2>{% if reports and reports|length > 0 %}{{ reports[0]['generated_at'][:10] }}{% else %}Recent{% endif %}</h2>
+                    <small>Recently updated</small>
+                </div>
+            </div>
+        </section>
+
+        <!-- REPORTS TABLE CARD -->
+        <section class="reports-table-card">
+            <div class="table-header">
+                <div>
+                    <h2>Available Reports</h2>
+                    <p>Your performance assessments and predictions</p>
+                </div>
+
+                <div class="report-filter">
+                    <select id="reportFilter">
+                        <option value="all">All Reports</option>
+                        <option value="performance">Performance</option>
+                        <option value="risk">Risk Analysis</option>
+                        <option value="prediction">Predictions</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="reports-table">
+                    <thead>
+                        <tr>
+                            <th>Report</th>
+                            <th>Type</th>
+                            <th>Faculty Evaluator</th>
+                            <th>Generated On</th>
+                            <th>Status</th>
+                            <th>Export Options</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportsTableBody">
+                        {% for r in reports %}
+                        <tr>
+                            <td>
+                                <div class="report-name">
+                                    <div class="report-file-icon">
+                                        <i class="bi bi-file-earmark-bar-graph"></i>
+                                    </div>
+                                    <div>
+                                        <strong>{{ r.report_type }} Report</strong>
+                                        <span>Official Faculty Performance Evaluation</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="type-badge {% if 'risk' in r.report_type|lower %}risk{% elif 'pred' in r.report_type|lower %}prediction{% else %}performance{% endif %}">
+                                    {{ r.report_type }}
+                                </span>
+                            </td>
+                            <td>
+                                <span style="font-weight: 500; color: #1e1b4b; display: inline-flex; align-items: center; gap: 6px;">
+                                    <i class="bi bi-person-badge" style="color: #6366f1;"></i>
+                                    {{ r.faculty_name }}
+                                </span>
+                            </td>
+                            <td>
+                                {{ r.generated_at[:16] if r.generated_at else 'Recent' }}
+                            </td>
+                            <td>
+                                <span class="status-badge completed">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    Ready
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-buttons" style="display: flex; gap: 8px; align-items: center;">
+                                    <a href="{{ url_for('download_student_report', report_id=r.id) }}" class="action-btn" title="Export Faculty Report (PDF)" style="display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; background: #EEF2FF; color: #4F46E5; border-radius: 6px; font-size: 13px; font-weight: 500; text-decoration: none; border: 1px solid #C7D2FE;">
+                                        <i class="bi bi-file-earmark-pdf"></i> PDF
+                                    </a>
+                                    <a href="{{ url_for('download_student_report_csv', report_id=r.id) }}" class="action-btn" title="Export Faculty Report (CSV)" style="display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; background: #F0FDF4; color: #16A34A; border-radius: 6px; font-size: 13px; font-weight: 500; text-decoration: none; border: 1px solid #BBF7D0;">
+                                        <i class="bi bi-file-earmark-spreadsheet"></i> CSV
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 40px; color: #85839a;">
+                                <i class="bi bi-file-earmark-text" style="font-size: 32px; display: block; margin-bottom: 10px; color: #a0aec0;"></i>
+                                No faculty-generated reports available yet. Once your instructors evaluate your progress, you will be able to export reports here.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- REPORTS JS -->
+    <script src="{{ url_for('static', filename='js/reports.js') }}"></script>
+</body>
+</html>

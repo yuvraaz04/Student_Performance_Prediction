@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Login | StudentIQ</title>
+
+
+    <!-- Google Font -->
+
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- Bootstrap Icons -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    >
+
+
+    <!-- Login CSS -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/Student_CSS/login.css') }}"
+    >
+
+</head>
+
+
+<body>
+
+
+<div class="login-page">
+
+
+    <!-- =================================================
+         LEFT BRANDING PANEL
+    ================================================== -->
+
+    <section class="login-brand">
+
+
+        <div class="brand-content">
+
+
+            <!-- Logo -->
+
+            <div class="brand-logo">
+
+                <div class="logo-icon">
+
+                    <i class="bi bi-mortarboard-fill"></i>
+
+                </div>
+
+
+                <div>
+
+                    <h1>StudentIQ</h1>
+
+                    <span>Predictive Analytics</span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Main Text -->
+
+            <div class="brand-text">
+
+                <span class="brand-label">
+                    SMARTER STUDENT ANALYTICS
+                </span>
+
+                <h2>
+                    Turn student data<br>
+                    into <span>better outcomes.</span>
+                </h2>
+
+                <p>
+                    Monitor performance, discover insights
+                    and predict academic outcomes with
+                    StudentIQ.
+                </p>
+
+            </div>
+
+
+
+            <!-- Illustration -->
+
+            <div class="brand-illustration">
+
+                <div class="illustration-card card-one">
+
+                    <i class="bi bi-graph-up-arrow"></i>
+
+                    <div>
+                        <strong>Performance</strong>
+                        <small>+18.4%</small>
+                    </div>
+
+                </div>
+
+
+                <div class="illustration-circle">
+
+                    <i class="bi bi-mortarboard-fill"></i>
+
+                </div>
+
+
+                <div class="illustration-card card-two">
+
+                    <i class="bi bi-cpu-fill"></i>
+
+                    <div>
+                        <strong>AI Prediction</strong>
+                        <small>92% accuracy</small>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="brand-footer">
+
+                <span>
+                    <i class="bi bi-shield-check"></i>
+                    Secure &amp; Reliable
+                </span>
+
+                <span>
+                    <i class="bi bi-bar-chart-fill"></i>
+                    Data Driven
+                </span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =================================================
+         RIGHT LOGIN PANEL
+    ================================================== -->
+
+    <section class="login-panel">
+
+
+        <div class="login-box">
+
+
+            <div class="login-heading">
+
+                <span class="mobile-logo">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </span>
+
+                <h2>Welcome back!</h2>
+
+                <p>
+                    Sign in to continue to your dashboard.
+                </p>
+
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div style="padding: 12px 16px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; display: flex; align-items: center; gap: 10px; background-color: {% if category == 'success' %}#def7ec; color: #03543f; border: 1px solid #bcf0da;{% else %}#fde8e8; color: #e02424; border: 1px solid #f8b4b4;{% endif %}">
+                            <i class="bi bi-info-circle-fill"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- ROLE -->
+
+            <div class="role-section">
+
+                <label>
+                    Login as
+                </label>
+
+
+                <div class="role-selector">
+
+
+                    <button
+                        type="button"
+                        class="role-btn active"
+                        data-role="student"
+                    >
+
+                        <i class="bi bi-person-fill"></i>
+
+                        <span>Student</span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="role-btn"
+                        data-role="teacher"
+                    >
+
+                        <i class="bi bi-person-workspace"></i>
+
+                        <span>Teacher</span>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- LOGIN FORM -->
+
+            <form method="POST" action="/" id="loginForm">
+
+                 <input type="hidden" name="role" id="selectedRole" value="student">
+                <!-- Email or Phone -->
+
+                <div class="form-group">
+
+                    <label for="email">
+                        Email Address or Phone Number
+                    </label>
+
+
+                    <div class="input-box">
+
+                        <i class="bi bi-person-badge"></i>
+
+                        <input
+                            type="text"
+                            id="email"
+                            name="email"
+                            placeholder="Enter registered email or phone"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Mobile Number (for SMS OTP) -->
+                <div class="form-group">
+                    <label for="phone">
+                        Mobile Number (Where SMS OTP will be sent)
+                    </label>
+                    <div class="input-box">
+                        <i class="bi bi-phone"></i>
+                        <input
+                            type="tel"
+                            id="phone"
+                            name="phone"
+                            placeholder="Enter mobile number to receive OTP"
+                        >
+                    </div>
+                    <small style="color: #64748b; font-size: 11px; margin-top: 4px; display: block;">
+                        Type your mobile number to receive your SMS OTP code directly.
+                    </small>
+                </div>
+
+
+
+                <!-- Password -->
+
+                <div class="form-group">
+
+                    <div class="password-label">
+
+                        <label for="password">
+                            Password
+                        </label>
+
+                        <a href="{{ url_for('forgot_password') }}">
+                            Forgot password?
+                        </a>
+
+                    </div>
+
+
+                    <div class="input-box">
+
+                        <i class="bi bi-lock"></i>
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Enter your password"
+                            required
+                        >
+
+                        <button
+                            type="button"
+                            class="password-toggle"
+                            id="passwordToggle"
+                        >
+
+                            <i class="bi bi-eye"></i>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Remember -->
+
+                <div class="remember-row">
+
+                    <label class="remember">
+
+                        <input
+                            type="checkbox"
+                            id="remember"
+                        >
+
+                        <span class="checkmark"></span>
+
+                        Remember me
+
+                    </label>
+
+                </div>
+
+
+
+                <!-- Login -->
+
+                <button
+                    type="submit"
+                    class="login-btn"
+                >
+
+                    <span>Send SMS OTP &amp; Continue</span>
+
+                    <i class="bi bi-arrow-right"></i>
+
+                </button>
+
+
+            </form>
+
+
+
+            <!-- Switch to Register -->
+            <div style="text-align: center; margin-top: 20px; font-size: 13.5px; color: #69657b;">
+                Faculty Member? <a href="{{ url_for('register') }}" style="color: #6c63ff; font-weight: 600; text-decoration: none;">Faculty Registration</a>
+                <div style="font-size: 11.5px; color: #94a3b8; margin-top: 5px;">
+                    Students: Accounts are enrolled directly by faculty advisors.
+                </div>
+            </div>
+
+            <!-- Demo Credentials -->
+            <div class="demo-note" style="margin-top: 15px;">
+                <i class="bi bi-shield-lock-fill"></i>
+                <span style="font-size: 12px; line-height: 1.45;">
+                    <strong>Default Accounts:</strong><br>
+                    Student: <code>student@gmail.com</code> / <code>1234</code><br>
+                    Teacher: <code>teacher@gmail.com</code> / <code>12345</code><br>
+                    <span style="color: #4f46e5; font-size: 11px;">* You can type any mobile number above to receive the SMS OTP on that number.</span>
+                </span>
+            </div>
+
+
+
+            <div class="login-footer">
+
+                <span>
+                    © 2026 StudentIQ
+                </span>
+
+                <span>
+                    Predictive Student Performance
+                </span>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+</div>
+
+
+
+<script>
+
+    /* ================================================
+       ROLE SELECTOR
+    ================================================= */
+
+    const roleButtons =
+        document.querySelectorAll(".role-btn");
+
+
+    roleButtons.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        roleButtons.forEach(btn =>
+            btn.classList.remove("active")
+        );
+
+        button.classList.add("active");
+
+        // Update selected role
+        document.getElementById("selectedRole").value =
+            button.dataset.role;
+
+    });
+
+});
+
+
+    /* ================================================
+       PASSWORD VISIBILITY
+    ================================================= */
+
+    const password =
+        document.getElementById("password");
+
+    const passwordToggle =
+        document.getElementById("passwordToggle");
+
+
+    passwordToggle.addEventListener("click", () => {
+
+        const isPassword =
+            password.type === "password";
+
+
+        password.type =
+            isPassword ? "text" : "password";
+
+
+        passwordToggle.innerHTML =
+            isPassword
+                ? '<i class="bi bi-eye-slash"></i>'
+                : '<i class="bi bi-eye"></i>';
+
+    });
+
+
+
+    /* ================================================
+       TEMPORARY LOGIN
+    ================================================= */
+
+   
+</script>
+
+
+</body>
+
+</html>

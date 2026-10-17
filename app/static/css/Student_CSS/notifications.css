@@ -1,0 +1,246 @@
+/* =========================================================
+   STUDENTIQ - NOTIFICATION DROPDOWN STYLES
+   ========================================================= */
+
+.notif-dropdown-container {
+    position: relative;
+    display: inline-block;
+}
+
+.student-notif-btn {
+    width: 44px;
+    height: 44px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    font-size: 19px;
+    color: #475569;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.student-notif-btn:hover {
+    background: #f8fafc;
+    color: #4f46e5;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+}
+
+.student-notif-badge {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    background: #ef4444;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.student-notif-badge.hidden {
+    display: none;
+}
+
+.student-notif-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 10px);
+    width: 360px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 20px 35px -5px rgba(15, 23, 42, 0.12), 0 8px 16px -6px rgba(15, 23, 42, 0.08);
+    z-index: 1050;
+    overflow: hidden;
+    animation: notifSlideDown 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.student-notif-menu.active {
+    display: block;
+}
+
+@keyframes notifSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.notif-menu-header {
+    padding: 14px 18px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.notif-menu-header .notif-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notif-menu-header h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.notif-menu-header .notif-count-pill {
+    background: #ede9fe;
+    color: #6366f1;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+.notif-mark-read-btn {
+    background: none;
+    border: none;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6366f1;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+
+.notif-mark-read-btn:hover {
+    background: #ede9fe;
+}
+
+.notif-items-list {
+    max-height: 330px;
+    overflow-y: auto;
+    padding: 6px 0;
+}
+
+.notif-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 18px;
+    text-decoration: none;
+    color: inherit;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.15s ease;
+    position: relative;
+    cursor: pointer;
+}
+
+.notif-item:last-child {
+    border-bottom: none;
+}
+
+.notif-item:hover {
+    background: #f8fafc;
+}
+
+.notif-item.unread {
+    background: #faf5ff;
+}
+
+.notif-item.unread:hover {
+    background: #f3e8ff;
+}
+
+.notif-item-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+}
+
+.notif-item-icon.green {
+    background: #ecfdf5;
+    color: #10b981;
+}
+
+.notif-item-icon.purple {
+    background: #ede9fe;
+    color: #6366f1;
+}
+
+.notif-item-icon.blue {
+    background: #e0f2fe;
+    color: #0284c7;
+}
+
+.notif-item-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.notif-item-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 3px;
+}
+
+.notif-item-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+
+.notif-item-time {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.notif-item-desc {
+    font-size: 12px;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.notif-menu-footer {
+    padding: 11px;
+    text-align: center;
+    border-top: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.notif-menu-footer a {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6366f1;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.notif-menu-footer a:hover {
+    text-decoration: underline;
+}

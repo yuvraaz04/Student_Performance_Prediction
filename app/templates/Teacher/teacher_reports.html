@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Reports | StudentIQ</title>
+
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+
+    <!-- Teacher Sidebar CSS -->
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/Teacher_CSS/teacher_sidebar.css') }}">
+
+
+    <!-- Reports CSS -->
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/Teacher_CSS/teacher_reports.css') }}">
+
+</head>
+
+
+<body>
+
+
+<div class="teacher-layout">
+
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    {% include 'Teacher/teacher_sidebar.html' %}
+
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
+
+    <main class="teacher-main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div style="padding: 14px 20px; margin: 15px 30px; border-radius: 12px; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; background: {% if category == 'success' %}#ecfdf5; color: #065f46; border: 1px solid #a7f3d0{% elif category == 'danger' %}#fef2f2; color: #991b1b; border: 1px solid #fecaca{% else %}#fffbeb; color: #92400e; border: 1px solid #fde68a{% endif %};">
+                    <i class="bi bi-info-circle-fill"></i>
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+
+        <!-- =================================================
+             TOP BAR
+        ================================================== -->
+
+        <header class="topbar">
+
+            <div class="search-box">
+
+                <i class="bi bi-search"></i>
+
+                <input
+                    type="text"
+                    id="reportsSearchInput"
+                    placeholder="Search reports..."
+                >
+
+            </div>
+
+
+            <div class="topbar-right">
+
+                <div class="teacher-profile">
+
+                    <div class="teacher-avatar" style="overflow: hidden; border-radius: 50%;">
+                        {% if current_avatar %}
+                            <img src="{{ current_avatar }}" alt="Faculty" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% elif teacher and teacher.profile_pic %}
+                            <img src="{{ url_for('static', filename=teacher.profile_pic) }}" alt="Faculty" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            <i class="bi bi-person"></i>
+                        {% endif %}
+                    </div>
+
+
+                    <div class="teacher-info">
+
+                        <strong>{{ teacher.name if teacher else "Teacher" }}</strong>
+
+                        <span>Teacher</span>
+
+                    </div>
+
+
+                    <i class="bi bi-chevron-down profile-arrow"></i>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- =================================================
+             PAGE HEADING
+        ================================================== -->
+
+        <section class="page-heading">
+
+            <div>
+
+                <h1>Reports</h1>
+
+                <p>
+                    Generate and review student performance
+                    and academic reports.
+                </p>
+
+            </div>
+
+
+            <button type="button" class="primary-btn" onclick="openGenerateModal()">
+                <i class="bi bi-file-earmark-plus"></i>
+                Generate Custom Report
+            </button>
+        </section>
+
+
+
+        <!-- =================================================
+             REPORT SUMMARY
+        ================================================== -->
+
+        <section class="report-summary">
+
+
+            <!-- Total Reports -->
+
+            <div class="summary-card">
+
+                <div class="summary-icon purple">
+
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+
+                </div>
+
+
+                <div>
+
+                    <strong>{{ total_reports }}</strong>
+
+                    <span>Total Reports</span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Performance -->
+
+            <div class="summary-card">
+
+                <div class="summary-icon blue">
+
+                    <i class="bi bi-graph-up-arrow"></i>
+
+                </div>
+
+
+                <div>
+
+                    <strong>{{ performance_reports }}</strong>
+
+                    <span>Performance Reports</span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Evaluations -->
+
+            <div class="summary-card">
+
+                <div class="summary-icon green">
+
+                    <i class="bi bi-clipboard-check"></i>
+
+                </div>
+
+
+                <div>
+
+                    <strong>{{ evaluation_reports }}</strong>
+
+                    <span>Evaluation Reports</span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- At Risk -->
+
+            <div class="summary-card">
+
+                <div class="summary-icon red">
+
+                    <i class="bi bi-exclamation-triangle"></i>
+
+                </div>
+
+
+                <div>
+
+                    <strong>{{ at_risk_students }}</strong>
+
+                    <span>At-Risk Students</span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             REPORT TYPES
+        ================================================== -->
+
+        <section class="section-heading">
+
+            <div>
+
+                <h2>Available Reports</h2>
+
+                <p>
+                    Choose a report to view or generate.
+                </p>
+
+            </div>
+
+        </section>
+
+
+
+        <section class="report-grid">
+
+
+            <!-- Performance Report -->
+
+            <div class="report-card">
+
+                <div class="report-icon purple">
+
+                    <i class="bi bi-bar-chart-line"></i>
+
+                </div>
+
+
+                <div class="report-content">
+
+                    <h3>Student Performance Report</h3>
+
+                    <p>
+                        View detailed academic performance
+                        of students across classes.
+                    </p>
+
+                </div>
+
+
+                <button type="button" class="report-btn" onclick="openGenerateModal('Performance')">
+                    Generate / View
+                    <i class="bi bi-arrow-right"></i>
+                </button>
+
+            </div>
+
+
+
+            <!-- At Risk Report -->
+
+            <div class="report-card">
+
+                <div class="report-icon red">
+
+                    <i class="bi bi-person-exclamation"></i>
+
+                </div>
+
+
+                <div class="report-content">
+
+                    <h3>At-Risk Student Report</h3>
+
+                    <p>
+                        Identify students who require
+                        additional academic support.
+                    </p>
+
+                </div>
+
+
+                <button type="button" class="report-btn" onclick="openGenerateModal('At-Risk')">
+                    Generate / View
+                    <i class="bi bi-arrow-right"></i>
+                </button>
+
+            </div>
+
+
+
+            <!-- Evaluation Report -->
+
+            <div class="report-card">
+
+                <div class="report-icon blue">
+
+                    <i class="bi bi-clipboard-data"></i>
+
+                </div>
+
+
+                <div class="report-content">
+
+                    <h3>Evaluation Report</h3>
+
+                    <p>
+                        Review student evaluations,
+                        feedback and teacher observations.
+                    </p>
+
+                </div>
+
+
+                <button type="button" class="report-btn" onclick="openGenerateModal('Evaluation')">
+                    Generate / View
+                    <i class="bi bi-arrow-right"></i>
+                </button>
+
+            </div>
+
+
+
+            <!-- Class Report -->
+
+            <div class="report-card">
+
+                <div class="report-icon green">
+
+                    <i class="bi bi-people"></i>
+
+                </div>
+
+
+                <div class="report-content">
+
+                    <h3>Class Performance Report</h3>
+
+                    <p>
+                        Compare academic performance
+                        across your different classes.
+                    </p>
+
+                </div>
+
+
+                <button type="button" class="report-btn" onclick="window.location.href='{{ url_for('export_all_students_csv') }}'">
+                    Export Class CSV
+                    <i class="bi bi-download"></i>
+                </button>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             RECENT REPORTS
+        ================================================== -->
+
+        <section class="dashboard-card recent-reports">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h3>Recent Reports</h3>
+
+                    <p>
+                        Recently generated student reports
+                    </p>
+
+                </div>
+
+                <a href="{{ url_for('export_all_students_csv') }}" class="more-btn" title="Export All Students CSV" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500;">
+                    <i class="bi bi-filetype-csv"></i> Export Class CSV
+                </a>
+
+            </div>
+
+
+            <div class="report-table">
+
+                <!-- HEADER -->
+
+                <div class="table-row table-header">
+
+                    <span>Report Name</span>
+
+                    <span>Type</span>
+
+                    <span>Date</span>
+
+                    <span>Status</span>
+
+                    <span>Action</span>
+
+                </div>
+
+
+                <!-- DATABASE REPORTS -->
+
+                {% for report in recent_reports %}
+
+                <div class="table-row">
+
+                    <div class="report-name">
+
+                        <div class="file-icon">
+
+                            <i class="bi bi-file-earmark-pdf"></i>
+
+                        </div>
+
+                        <span>
+                            {{ report["student_name"] or "Student" }} - {{ report["report_type"] }}
+                        </span>
+
+                    </div>
+
+
+                    <span>
+                        {{ report["report_type"] }}
+                    </span>
+
+
+                    <span>
+                        {{ report["generated_at"] }}
+                    </span>
+
+
+                    <span class="status completed">
+                        Completed
+                    </span>
+
+
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <a
+                            href="{{ url_for('download_teacher_report', report_id=report['id']) }}"
+                            class="download-btn"
+                            title="Download PDF"
+                        >
+                            <i class="bi bi-file-earmark-pdf-fill"></i>
+                        </a>
+                        <a
+                            href="{{ url_for('download_teacher_report_csv', report_id=report['id']) }}"
+                            class="download-btn"
+                            title="Download CSV"
+                            style="background-color: #e8f5e9; color: #2e7d32;"
+                        >
+                            <i class="bi bi-filetype-csv"></i>
+                        </a>
+                        <form method="POST" action="{{ url_for('delete_teacher_report', report_id=report['id']) }}" onsubmit="return confirm('Are you sure you want to delete this report?');" style="margin: 0; display: inline;">
+                            <button
+                                type="submit"
+                                class="download-btn"
+                                title="Delete Report"
+                                style="background-color: #fee2e2; color: #dc2626; border: none; cursor: pointer;"
+                            >
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+
+                {% else %}
+
+                <div class="table-row">
+
+                    <span style="grid-column: 1 / -1; text-align: center;">
+
+                        No reports generated yet. Click "Generate Custom Report" above to create reports for your students.
+
+                    </span>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </section>
+
+
+
+    </main>
+
+</div>
+
+<!-- =========================================================
+     MODAL: GENERATE CUSTOM REPORT
+     ========================================================= -->
+<div class="modal-overlay" id="generateReportModal" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 999; justify-content: center; align-items: center;">
+    <div class="modal-content" style="background: #fff; width: 100%; max-width: 520px; border-radius: 12px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
+            <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-file-earmark-plus" style="color: #4f46e5;"></i>
+                Generate Student Report
+            </h3>
+            <button type="button" onclick="closeGenerateModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #94a3b8; line-height: 1;">&times;</button>
+        </div>
+
+        <form method="POST" action="{{ url_for('generate_teacher_report') }}">
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-weight: 600; font-size: 13px; color: #374151; margin-bottom: 6px;">Report Type *</label>
+                <select name="report_type" id="modalReportType" style="width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; background: #fff;" required>
+                    <option value="Performance">Student Performance Report</option>
+                    <option value="At-Risk">At-Risk Student Report</option>
+                    <option value="Evaluation">Evaluation &amp; Feedback Report</option>
+                    <option value="Class Performance">Class Performance Report</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-weight: 600; font-size: 13px; color: #374151; margin-bottom: 6px;">Target Students *</label>
+                <select name="student_id" id="modalStudentId" style="width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; background: #fff;" required>
+                    <option value="all">All Students</option>
+                    {% if students %}
+                        {% for s in students %}
+                            <option value="{{ s.id }}">{{ s.name }} ({{ s.department }} - Sem {{ s.semester }})</option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+                <button type="button" onclick="closeGenerateModal()" style="padding: 10px 18px; border: 1px solid #d1d5db; background: #fff; color: #374151; border-radius: 8px; font-weight: 600; cursor: pointer;">Cancel</button>
+                <button type="submit" style="padding: 10px 20px; border: none; background: #4f46e5; color: #fff; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                    <i class="bi bi-file-earmark-check"></i> Generate
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openGenerateModal(reportType) {
+    const modal = document.getElementById('generateReportModal');
+    if (reportType) {
+        document.getElementById('modalReportType').value = reportType;
+    }
+    modal.style.display = 'flex';
+}
+
+function closeGenerateModal() {
+    document.getElementById('generateReportModal').style.display = 'none';
+}
+
+window.addEventListener('click', function(e) {
+    const modal = document.getElementById('generateReportModal');
+    if (e.target === modal) {
+        closeGenerateModal();
+    }
+});
+
+// Live filter reports and report templates
+const reportsSearch = document.getElementById('reportsSearchInput');
+if (reportsSearch) {
+    reportsSearch.addEventListener('input', function() {
+        const query = reportsSearch.value.trim().toLowerCase();
+
+        // Filter available report cards
+        const reportCards = document.querySelectorAll('.report-grid .report-card');
+        reportCards.forEach(card => {
+            const text = card.innerText.toLowerCase();
+            card.style.display = (!query || text.includes(query)) ? '' : 'none';
+        });
+
+        // Filter recent reports table rows
+        const tableRows = document.querySelectorAll('.report-table .table-row:not(.table-header)');
+        tableRows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = (!query || text.includes(query)) ? 'grid' : 'none';
+        });
+    });
+}
+</script>
+
+</body>
+
+</html>

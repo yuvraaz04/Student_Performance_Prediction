@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | StudentIQ</title>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Login & Register CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Student_CSS/login.css') }}">
+    <style>
+        .register-box {
+            width: 100%;
+            max-width: 480px;
+            margin: auto;
+            padding: 30px 20px;
+        }
+        .form-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .select-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .select-box i {
+            position: absolute;
+            left: 14px;
+            color: #8c89a0;
+            font-size: 16px;
+        }
+        .select-box select {
+            width: 100%;
+            padding: 13px 14px 13px 44px;
+            border-radius: 12px;
+            border: 1.5px solid #e7e6f0;
+            background: #fff;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            color: #302d42;
+            appearance: none;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .select-box select:focus {
+            border-color: #6c63ff;
+        }
+        .select-box .chevron {
+            position: absolute;
+            right: 14px;
+            pointer-events: none;
+            color: #8c89a0;
+            font-size: 13px;
+        }
+        .alert-box {
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .alert-danger {
+            background-color: #fde8e8;
+            color: #e02424;
+            border: 1px solid #f8b4b4;
+        }
+        .alert-success {
+            background-color: #def7ec;
+            color: #03543f;
+            border: 1px solid #bcf0da;
+        }
+        .switch-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #69657b;
+        }
+        .switch-link a {
+            color: #6c63ff;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .switch-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="login-page">
+
+    <!-- ================= LEFT BRANDING PANEL ================= -->
+    <section class="login-brand">
+        <div class="brand-content">
+            <div class="brand-logo">
+                <div class="logo-icon">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </div>
+                <div>
+                    <h1>StudentIQ</h1>
+                    <span>Predictive Analytics</span>
+                </div>
+            </div>
+
+            <div class="brand-text">
+                <span class="brand-label">JOIN STUDENTIQ</span>
+                <h2>
+                    Create your account<br>
+                    and <span>unlock predictive insights.</span>
+                </h2>
+                <p>
+                    Whether you are a student tracking performance or a teacher guiding academic success, StudentIQ gives you data-driven clarity.
+                </p>
+            </div>
+
+            <div class="brand-illustration">
+                <div class="illustration-card card-one">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    <div>
+                        <strong>Real-time Analytics</strong>
+                        <small>Dynamic Tracking</small>
+                    </div>
+                </div>
+
+                <div class="illustration-circle">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </div>
+
+                <div class="illustration-card card-two">
+                    <i class="bi bi-cpu-fill"></i>
+                    <div>
+                        <strong>Random Forest Model</strong>
+                        <small>Trained &amp; Ready</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="brand-footer">
+                <span><i class="bi bi-shield-check"></i> Secure &amp; Reliable</span>
+                <span><i class="bi bi-bar-chart-fill"></i> Data Driven</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= RIGHT REGISTRATION PANEL ================= -->
+    <section class="login-panel">
+        <div class="register-box">
+            <div class="login-heading">
+                <span class="mobile-logo">
+                    <i class="bi bi-person-workspace"></i>
+                </span>
+                <h2>Faculty Registration</h2>
+                <p>Register your faculty instructor account with mobile verification.</p>
+            </div>
+
+            <!-- STUDENT POLICY NOTICE -->
+            <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; color: #1e40af; display: flex; align-items: flex-start; gap: 10px; line-height: 1.45;">
+                <i class="bi bi-info-circle-fill" style="font-size: 16px; margin-top: 1px; color: #3b82f6;"></i>
+                <div>
+                    <strong>Student Notice:</strong> Student accounts are provisioned directly by faculty advisors. If you are a student, please contact your instructor to receive your login credentials.
+                </div>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert-box alert-{{ category }}">
+                            <i class="bi bi-info-circle-fill"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- REGISTRATION FORM -->
+            <form method="POST" action="{{ url_for('register') }}" id="registerForm">
+                <input type="hidden" name="role" id="selectedRole" value="teacher">
+
+                <!-- Full Name -->
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <div class="input-box">
+                        <i class="bi bi-person"></i>
+                        <input type="text" id="name" name="name" placeholder="e.g. Prof. Jonathan Davis" required>
+                    </div>
+                </div>
+
+                <!-- Email Address -->
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <div class="input-box">
+                        <i class="bi bi-envelope"></i>
+                        <input type="email" id="email" name="email" placeholder="e.g. teacher@university.edu" required>
+                    </div>
+                </div>
+
+                <!-- Phone Number (For SMS OTP) -->
+                <div class="form-group">
+                    <label for="phone">Phone Number (For SMS OTP Verification)</label>
+                    <div class="input-box">
+                        <i class="bi bi-telephone"></i>
+                        <input type="tel" id="phone" name="phone" placeholder="e.g. +91 98765 43210" required>
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-box">
+                        <i class="bi bi-lock"></i>
+                        <input type="password" id="password" name="password" placeholder="Create a strong password" required minlength="4">
+                        <button type="button" class="password-toggle" id="passwordToggle">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Department -->
+                <div class="form-group">
+                    <label for="department">Department / Faculty</label>
+                    <div class="input-box">
+                        <i class="bi bi-building"></i>
+                        <input type="text" id="department" name="department" placeholder="e.g. Computer Science & AI" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="login-btn" style="margin-top: 20px;">
+                    <span>Verify Phone &amp; Register</span>
+                    <i class="bi bi-arrow-right"></i>
+                </button>
+            </form>
+
+            <div class="switch-link">
+                Already have a faculty or student account? <a href="{{ url_for('login') }}">Sign In</a>
+            </div>
+
+            <div class="login-footer">
+                <span>© 2026 StudentIQ</span>
+                <span>Secure Faculty Portal</span>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<script>
+    // Password Toggle
+    const password = document.getElementById("password");
+    const passwordToggle = document.getElementById("passwordToggle");
+
+    passwordToggle.addEventListener("click", () => {
+        const isPassword = password.type === "password";
+        password.type = isPassword ? "text" : "password";
+        passwordToggle.innerHTML = isPassword ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>StudentIQ | Analytics</title>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Existing global CSS -->
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/Student_CSS/sidebar.css') }}">
+
+    <!-- Analytics CSS -->
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/Student_CSS/analytics.css') }}">
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/Student_CSS/notifications.css') }}">
+
+</head>
+
+<body>
+
+<div class="app-container">
+
+
+    <!-- =====================================================
+         SIDEBAR
+         DO NOT MODIFY THIS SIDEBAR
+    ====================================================== -->
+          {% include 'Student/sidebar.html' %}
+
+
+    <!-- =====================================================
+         ANALYTICS CONTENT
+    ====================================================== -->
+
+    <main class="analytics-main">
+
+
+        <!-- HEADER -->
+
+        <header class="analytics-header">
+
+            <div>
+
+                <span class="analytics-label">
+                    STUDENT ANALYTICS
+                </span>
+
+                <h1>
+                    Your Performance
+                </h1>
+
+                <p>
+                    Understand your academic performance and learning patterns.
+                </p>
+
+            </div>
+
+
+            <div class="analytics-header-actions" style="display: flex; align-items: center; gap: 14px;">
+
+                {% include 'Student/notifications_widget.html' %}
+
+                <!-- Profile -->
+                <div class="student-profile" style="display: flex; align-items: center; gap: 8px;">
+                    <div class="profile-avatar" style="overflow: hidden; border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #6c63ff, #5b3df5); color: white;">
+                        {% if current_avatar %}
+                            <img src="{{ current_avatar }}" alt="{{ student.name if student else 'Student' }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% elif student and student.profile_pic %}
+                            <img src="{{ url_for('static', filename=student.profile_pic) }}" alt="{{ student.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            <i class="bi bi-person-fill" style="font-size: 18px;"></i>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <select class="period-select">
+                    <option>This Semester</option>
+                    <option>Last Semester</option>
+                    <option>This Year</option>
+                </select>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- =================================================
+             SUMMARY WIDGETS
+        ================================================== -->
+
+        <section class="summary-grid">
+
+
+            <div class="summary-card purple-card">
+
+                <div class="summary-icon">
+                    <i class="bi bi-award-fill"></i>
+                </div>
+
+                <div>
+
+                    <span>Overall Score</span>
+
+                    <h2>{{ average_marks }}%</h2>
+
+                    <p>
+                        <i class="bi bi-arrow-up"></i>
+                        Active Average
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="summary-card blue-card">
+
+                <div class="summary-icon">
+                    <i class="bi bi-calendar-check-fill"></i>
+                </div>
+
+                <div>
+
+                    <span>Attendance</span>
+
+                    <h2>{{ average_attendance }}%</h2>
+
+                    <p>
+                        {% if average_attendance >= 85 %}Good attendance{% else %}Needs attention{% endif %}
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="summary-card green-card">
+
+                <div class="summary-icon">
+                    <i class="bi bi-stars"></i>
+                </div>
+
+                <div>
+
+                    <span>Predicted Score</span>
+
+                    <h2>{{ predicted_score }}%</h2>
+
+                    <p>
+                        ML Model Output
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="summary-card orange-card">
+
+                <div class="summary-icon">
+                    <i class="bi bi-speedometer2"></i>
+                </div>
+
+                <div>
+
+                    <span>Performance Status</span>
+
+                    <h2>{{ performance_level or ('Good' if average_marks >= 75 else ('Average' if average_marks >= 50 else 'Needs Support')) }}</h2>
+
+                    <p>
+                        {% if 'Excellent' in (performance_level or '') or 'Good' in (performance_level or '') %}On track{% elif 'Average' in (performance_level or '') %}Consistent{% else %}Focus needed{% endif %}
+                    </p>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+
+
+
+
+        <!-- =================================================
+             SUBJECT + ATTENDANCE
+        ================================================== -->
+
+        <section class="analytics-two-column">
+
+
+            <!-- SUBJECT PERFORMANCE -->
+
+            <div class="analytics-widget">
+
+                <div class="widget-header">
+
+                    <div>
+
+                        <h2>Subject Performance</h2>
+
+                        <p>
+                            Your strongest and weakest subjects
+                        </p>
+
+                    </div>
+
+                    <i class="bi bi-bar-chart-line-fill"></i>
+
+                </div>
+
+
+                <div class="subject-list">
+
+                    {% for row in academic_records %}
+                    <div class="subject-row">
+
+                        <div class="subject-info">
+
+                            <span>{{ row["subject"] }}</span>
+
+                            <strong>{{ row["marks"] }}%</strong>
+
+                        </div>
+
+                        <div class="progress-track">
+
+                            <div class="progress-fill {% if loop.index == 1 %}purple-fill{% elif loop.index == 2 %}blue-fill{% elif loop.index == 3 %}green-fill{% else %}orange-fill{% endif %}"
+                                 style="width:{{ row['marks'] }}%">
+                            </div>
+
+                        </div>
+
+                    </div>
+                    {% endfor %}
+
+                </div>
+
+
+                <div class="widget-footer">
+
+                    <i class="bi bi-lightbulb-fill"></i>
+
+                    <span>
+                        {{ strongest_subject }} is currently your strongest subject.
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ATTENDANCE -->
+
+            <div class="analytics-widget">
+
+                <div class="widget-header">
+
+                    <div>
+
+                        <h2>Attendance Analysis</h2>
+
+                        <p>
+                            Your attendance throughout the semester
+                        </p>
+
+                    </div>
+
+                    <i class="bi bi-calendar-check-fill"></i>
+
+                </div>
+
+
+                <div class="attendance-content">
+
+
+                    <div class="attendance-circle">
+
+                        <div>
+
+                            <strong>{{ average_attendance }}%</strong>
+
+                            <span>
+                                Attendance
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="attendance-details">
+
+                        <div>
+
+                            <span class="dot present"></span>
+
+                            <div>
+
+                                <strong>Present</strong>
+
+                                <small>
+                                    {{ attended_classes }} classes
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+                        <div>
+
+                            <span class="dot absent"></span>
+
+                            <div>
+
+                                <strong>Absent</strong>
+
+                                <small>
+                                    {{ absent_classes }} classes
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+                        <div>
+
+                            <span class="dot target"></span>
+
+                            <div>
+
+                                <strong>Target</strong>
+
+                                <small>
+                                    85%
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="attendance-message">
+
+                    <i class="bi bi-check-circle-fill"></i>
+
+                    <span>
+                        {% if average_attendance >= 85 %}Your attendance is above the required 85% threshold.{% else %}Attendance is below 85% target — improve attendance to boost prediction.{% endif %}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             LEARNING INSIGHTS
+        ================================================== -->
+
+        <section class="analytics-section">
+
+
+            <div class="section-heading">
+
+                <div>
+
+                    <h2>Learning Insights</h2>
+
+                    <p>
+                        Personalized insights based on your academic performance
+                    </p>
+
+                </div>
+
+                <span class="section-badge purple-badge">
+                    AI Powered
+                </span>
+
+            </div>
+
+
+            <div class="insights-grid">
+
+
+                <div class="insight-widget">
+
+                    <div class="insight-widget-icon purple-icon">
+                        <i class="bi bi-trophy-fill"></i>
+                    </div>
+
+                    <div>
+
+                        <span>Strongest Area</span>
+
+                        <h3>
+                            {{ strongest_subject }}
+                        </h3>
+
+                        <p>
+                            You're consistently performing above your class average in this subject.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="insight-widget">
+
+                    <div class="insight-widget-icon green-icon">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+
+                    <div>
+
+                        <span>Predicted Score</span>
+
+                        <h3>
+                            {{ predicted_score }}%
+                        </h3>
+
+                        <p>
+                            Model forecast based on attendance, study habits, and continuous assessment.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="insight-widget">
+
+                    <div class="insight-widget-icon orange-icon">
+                        <i class="bi bi-bullseye"></i>
+                    </div>
+
+                    <div>
+
+                        <span>Focus Area</span>
+
+                        <h3>
+                            {{ weakest_subject }}
+                        </h3>
+
+                        <p>
+                            Spending additional study and practice time here will improve overall score.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             PROGRESS WIDGET
+        ================================================== -->
+
+        <section class="progress-widget">
+
+            <div class="progress-left">
+
+                <div class="progress-icon">
+
+                    <i class="bi bi-rocket-takeoff-fill"></i>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        THIS SEMESTER
+                    </span>
+
+                    <h2>
+                        You're making great progress!
+                    </h2>
+
+                    <p>
+                        Keep maintaining your attendance and focus
+                        on your weaker subjects to improve your
+                        predicted performance.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="progress-score">
+
+                <strong>
+                    {{ average_marks }}%
+                </strong>
+
+                <span>
+                    Current Score
+                </span>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+</div>
+
+</body>
+
+</html>

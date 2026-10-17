@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Teacher Dashboard | StudentIQ</title>
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Teacher Dashboard CSS -->
+     <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/Teacher_CSS/teacher_sidebar.css') }}">
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/Teacher_CSS/teacher_dashboard.css') }}">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<div class="teacher-layout">
+
+    <!-- =====================================================
+         EXISTING SIDEBAR
+         ===================================================== -->
+    {% include 'Teacher/teacher_sidebar.html' %}
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+         ===================================================== -->
+    <main class="teacher-main">
+
+        <!-- TOP BAR -->
+        <header class="topbar">
+
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text"
+                       id="dashboardSearchInput"
+                       placeholder="Search students, classes, records...">
+            </div>
+
+            <div class="topbar-right">
+
+                <div class="teacher-profile">
+                    <div class="teacher-avatar" style="overflow: hidden; border-radius: 50%;">
+                        {% if current_avatar %}
+                            <img src="{{ current_avatar }}" alt="Faculty" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% elif teacher and teacher.profile_pic %}
+                            <img src="{{ url_for('static', filename=teacher.profile_pic) }}" alt="Faculty" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            <i class="bi bi-person"></i>
+                        {% endif %}
+                    </div>
+
+                    <div class="teacher-info">
+                        <strong>{{ teacher_name }}</strong>
+                        <span>Faculty Member</span>
+                    </div>
+
+                    <i class="bi bi-chevron-down profile-arrow"></i>
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- PAGE HEADING -->
+        <section class="page-heading">
+
+            <div>
+                <h1>Teacher Dashboard</h1>
+                <p>
+                    Monitor student performance and identify students
+                    who may need additional support.
+                </p>
+            </div>
+
+            <button class="primary-btn">
+                <i class="bi bi-plus-lg"></i>
+                New Evaluation
+            </button>
+
+        </section>
+
+
+        <!-- =====================================================
+             WELCOME BANNER
+             ===================================================== -->
+        <section class="welcome-banner">
+
+            <div class="welcome-content">
+
+                <span class="welcome-label">
+                    TEACHER OVERVIEW
+                </span>
+
+                <h2>
+                    Good morning, {{ teacher_name }}! <span>👋</span>
+                </h2>
+
+                <p>
+                    Faculty Academic Management & Predictive Intelligence Portal.
+                </p>
+
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="banner-btn" onclick="window.location.href='{{ url_for('teacher_students') }}'">
+                        View My Students
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+                    <button class="banner-btn" onclick="window.location.href='{{ url_for('teacher_attendance') }}'" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);">
+                        <i class="bi bi-calendar-check"></i>
+                        Attendance Management
+                    </button>
+                    <button class="banner-btn" onclick="window.location.href='{{ url_for('teacher_prediction') }}'" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);">
+                        <i class="bi bi-cpu"></i>
+                        Student Prediction
+                    </button>
+                </div>
+
+            </div>
+
+            <div class="welcome-illustration">
+                <div class="illustration-circle circle-one"></div>
+                <div class="illustration-circle circle-two"></div>
+
+                <div class="teacher-illustration">
+                    <i class="bi bi-person-workspace"></i>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+        <!-- =====================================================
+             KPI CARDS: PERFORMANCE CATEGORIES
+             ===================================================== -->
+        <section class="kpi-grid">
+
+            <!-- Total Students -->
+            <div class="kpi-card">
+                <div class="kpi-top">
+                    <div class="kpi-icon blue">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <span class="trend positive">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Active
+                    </span>
+                </div>
+                <div class="kpi-value">{{ total_students }}</div>
+                <div class="kpi-title">Total Students</div>
+                <div class="kpi-subtitle">Enrolled in system</div>
+            </div>
+
+            <!-- Excellent Students Card -->
+            <div class="kpi-card category-card">
+                <div class="kpi-top">
+                    <div class="kpi-icon green">
+                        <i class="bi bi-award-fill"></i>
+                    </div>
+                    <span class="trend positive" style="background: #e7f7f0; color: #279067; padding: 2px 8px; border-radius: 12px;">
+                        Score &ge; 75%
+                    </span>
+                </div>
+                <div class="kpi-value" style="color: #279067;">{{ excellent_count }}</div>
+                <div class="kpi-title">Excellent Students</div>
+                <div class="kpi-subtitle">{{ excellent_pct }}% of student body</div>
+            </div>
+
+            <!-- Average Students Card -->
+            <div class="kpi-card category-card">
+                <div class="kpi-top">
+                    <div class="kpi-icon yellow">
+                        <i class="bi bi-bar-chart-fill"></i>
+                    </div>
+                    <span class="trend neutral" style="background: #fff5db; color: #d69a1d; padding: 2px 8px; border-radius: 12px;">
+                        Score 50–74%
+                    </span>
+                </div>
+                <div class="kpi-value" style="color: #d69a1d;">{{ average_count }}</div>
+                <div class="kpi-title">Average Students</div>
+                <div class="kpi-subtitle">{{ average_pct }}% of student body</div>
+            </div>
+
+            <!-- Poor Students Card -->
+            <div class="kpi-card category-card">
+                <div class="kpi-top">
+                    <div class="kpi-icon red">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+                    <span class="trend negative" style="background: #ffebed; color: #e95663; padding: 2px 8px; border-radius: 12px;">
+                        Score &lt; 50%
+                    </span>
+                </div>
+                <div class="kpi-value" style="color: #e95663;">{{ poor_count }}</div>
+                <div class="kpi-title">Poor Students</div>
+                <div class="kpi-subtitle">{{ poor_pct }}% require attention</div>
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             CHART SECTION
+             ===================================================== -->
+        <section class="dashboard-grid">
+
+            <!-- Performance Chart -->
+            <div class="dashboard-card performance-card">
+
+                <div class="card-header">
+
+                    <div>
+                        <h3>Student Performance Overview</h3>
+                        <p>Average performance by class</p>
+                    </div>
+
+                    <select class="card-select">
+                        <option>This Month</option>
+                        <option>This Semester</option>
+                        <option>This Year</option>
+                    </select>
+
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+
+            </div>
+
+
+            <!-- Performance Distribution -->
+            <div class="dashboard-card distribution-card">
+
+                <div class="card-header">
+
+                    <div>
+                        <h3>Performance Distribution</h3>
+                        <p>Overall student performance</p>
+                    </div>
+
+                    <button class="more-btn">
+                        <i class="bi bi-three-dots"></i>
+                    </button>
+
+                </div>
+
+                <div class="donut-wrapper">
+
+                    <div class="donut-chart">
+                        <canvas id="distributionChart"></canvas>
+
+                        <div class="donut-center">
+                            <strong>{{ average_performance }}%</strong>
+                            <span>Average</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="distribution-legend">
+
+                    <div>
+                        <span class="legend-dot high" style="background: #279067;"></span>
+                        Excellent (&ge;75%)
+                        <strong>{{ excellent_pct }}% ({{ excellent_count }})</strong>
+                    </div>
+
+                    <div>
+                        <span class="legend-dot medium" style="background: #6547e8;"></span>
+                        Average (50–74%)
+                        <strong>{{ average_pct }}% ({{ average_count }})</strong>
+                    </div>
+
+                    <div>
+                        <span class="legend-dot low" style="background: #e95663;"></span>
+                        Poor (&lt;50%)
+                        <strong>{{ poor_pct }}% ({{ poor_count }})</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             LOWER DASHBOARD
+             ===================================================== -->
+        <section class="dashboard-grid lower-grid">
+
+            <!-- Students Requiring Attention (Dynamic) -->
+            <div class="dashboard-card" style="width: 100%;">
+
+                <div class="card-header" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+
+                    <div>
+                        <h3 style="display: flex; align-items: center; gap: 8px;">
+                            <span>Students Requiring Attention</span>
+                            {% if attention_students %}
+                                <span style="background: #fee2e2; color: #dc2626; font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: 700;">
+                                    {{ attention_students|length }} at risk
+                                </span>
+                            {% endif %}
+                        </h3>
+                        <p>Automatically populated when student predictions or test scores indicate poor performance (&lt; 50% or High Risk)</p>
+                    </div>
+
+                    <a href="{{ url_for('teacher_students') }}"
+                       class="view-link">
+                        View all students
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+
+                </div>
+
+
+                <div class="student-list">
+
+                    {% if attention_students %}
+                        {% for student in attention_students %}
+                            <div class="student-row" style="padding: 13px 4px; border-bottom: 1px solid #f0f1f7; display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+
+                                <div style="display: flex; align-items: center; gap: 12px; min-width: 220px;">
+                                    <div class="student-avatar" style="background: #fee2e2; color: #dc2626; font-weight: 700; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0;">
+                                        {{ student.initials }}
+                                    </div>
+
+                                    <div class="student-details">
+                                        <strong style="font-size: 13px; color: #1e1f32;">{{ student.name }}</strong>
+                                        <span style="font-size: 11px; color: #87899b; display: block;">Semester {{ student.semester }} • {{ student.department }}</span>
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                                    <div style="text-align: right;">
+                                        <div style="font-size: 10px; color: #87899b; text-transform: uppercase;">Attendance</div>
+                                        <strong style="font-size: 12px; color: {% if student.average_attendance >= 85 %}#16a34a{% elif student.average_attendance >= 75 %}#d97706{% else %}#dc2626{% endif %};">
+                                            {{ student.average_attendance }}%
+                                        </strong>
+                                    </div>
+
+                                    <div class="risk-badge high-risk" style="background: #fee2e2; color: #dc2626; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;">
+                                        <i class="bi bi-exclamation-triangle-fill"></i>
+                                        {{ student.risk_level }}
+                                    </div>
+
+                                    <div class="student-score" style="font-size: 15px; font-weight: 700; color: #dc2626; min-width: 45px; text-align: right;">
+                                        {{ student.score }}%
+                                    </div>
+
+                                    <a href="{{ url_for('teacher_prediction') }}?student_id={{ student.id }}"
+                                       class="view-link"
+                                       style="background: #f8f9fe; border: 1px solid #e2e4ed; padding: 6px 12px; border-radius: 8px; font-size: 11px; text-decoration: none;"
+                                       title="View ML Prediction & Risk Assessment">
+                                        <i class="bi bi-cpu"></i> Predict
+                                    </a>
+                                </div>
+
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div style="text-align: center; padding: 36px 20px; color: #64748b;">
+                            <i class="bi bi-check-circle-fill" style="font-size: 34px; color: #10b981; margin-bottom: 8px; display: inline-block;"></i>
+                            <h4 style="font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 4px;">No Students Currently Require Urgent Attention</h4>
+                            <p style="font-size: 12px; color: #94a3b8; max-width: 480px; margin: 0 auto;">
+                                All enrolled students currently have satisfactory performance scores. When a student's prediction or academic score is poor (&lt; 50% or High Risk), they will automatically appear in this list.
+                            </p>
+                        </div>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             EVALUATIONS
+             ===================================================== -->
+        <section class="dashboard-grid bottom-grid">
+
+            <!-- Pending Evaluations -->
+            <div class="dashboard-card evaluation-card">
+
+                <div class="card-header">
+
+                    <div>
+                        <h3>Pending Evaluations</h3>
+                        <p>Complete student feedback forms and academic evaluations</p>
+                    </div>
+
+                    <span class="pending-count">8</span>
+
+                </div>
+
+
+                <div class="evaluation-progress">
+
+                    <div class="progress-info">
+                        <span>Evaluation Status</span>
+                        <strong>Active</strong>
+                    </div>
+
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 75%;"></div>
+                    </div>
+
+                    <p>
+                        Track and submit comprehensive student performance evaluations
+                    </p>
+
+                </div>
+
+
+                <button class="evaluation-btn"
+                        onclick="window.location.href='{{ url_for('teacher_evaluation') }}'">
+
+                    <i class="bi bi-clipboard2-check"></i>
+
+                    Complete Evaluations
+
+                    <i class="bi bi-arrow-right"></i>
+
+                </button>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- =====================================================
+     CHARTS
+     ===================================================== -->
+<span id="average-performance"
+      style="display:none;">
+    {{ average_performance }}
+</span>
+
+<span id="high-performance" style="display:none;">
+    {{ high_performance }}
+</span>
+
+<span id="average-performance-count" style="display:none;">
+    {{ average_performance_count }}
+</span>
+
+<span id="needs-support" style="display:none;">
+    {{ needs_support }}
+</span>
+
+<script>
+
+    /* =========================================
+       PERFORMANCE BAR CHART
+       ========================================= */
+const averagePerformance = parseFloat(
+    document.getElementById("average-performance").textContent
+);
+
+const performanceCtx =
+    document.getElementById('performanceChart');
+
+new Chart(performanceCtx, {
+
+    type: 'bar',
+
+    data: {
+
+        labels: ['Sem 3'],
+
+        datasets: [
+
+            {
+                label: 'Average Performance',
+
+                data: [averagePerformance],
+
+                borderRadius: 7,
+
+                barThickness: 25
+            }
+
+        ]
+
+    },
+
+    options: {
+
+        responsive: true,
+
+        maintainAspectRatio: false,
+
+        plugins: {
+
+            legend: {
+                display: false
+            }
+
+        },
+
+        scales: {
+
+            y: {
+
+                beginAtZero: true,
+
+                max: 100,
+
+                ticks: {
+                    stepSize: 20
+                },
+
+                grid: {
+                    drawBorder: false
+                }
+
+            },
+
+            x: {
+
+                grid: {
+                    display: false
+                }
+
+            }
+
+        }
+
+    }
+
+});
+
+
+    /* =========================================
+       PERFORMANCE DISTRIBUTION
+       ========================================= */
+    const distributionCtx =
+        document.getElementById('distributionChart');
+
+    new Chart(distributionCtx, {
+
+        type: 'doughnut',
+
+        data: {
+
+            labels: [
+                'Excellent',
+                'Average',
+                'Poor'
+            ],
+
+            datasets: [
+
+                {
+                    data: [
+                        {{ excellent_count }},
+                        {{ average_count }},
+                        {{ poor_count }}
+                    ],
+
+                    backgroundColor: [
+                        '#279067',
+                        '#6547e8',
+                        '#e95663'
+                    ],
+
+                    borderWidth: 0,
+
+                    cutout: '75%'
+                }
+
+            ]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: true,
+
+            plugins: {
+
+                legend: {
+                    display: false
+                }
+
+            }
+
+        }
+
+    });
+
+    // Dashboard Search Input: Live filter attention students & quick navigate on Enter
+    const dashSearch = document.getElementById("dashboardSearchInput");
+    if (dashSearch) {
+        dashSearch.addEventListener("input", function() {
+            const query = dashSearch.value.trim().toLowerCase();
+            const studentRows = document.querySelectorAll(".student-list .student-row");
+            studentRows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = (!query || text.includes(query)) ? "flex" : "none";
+            });
+        });
+        dashSearch.addEventListener("keydown", function(e) {
+            if (e.key === "Enter") {
+                const query = dashSearch.value.trim();
+                if (query) {
+                    window.location.href = "{{ url_for('teacher_students') }}?search=" + encodeURIComponent(query);
+                }
+            }
+        });
+    }
+
+</script>
+
+</body>
+</html>

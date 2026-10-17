@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>StudentIQ | Students </title>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet"
+      href="{{ url_for('static', filename='css/Student_CSS/sidebar.css') }}">
+      
+    <link rel="stylesheet"
+      href="{{ url_for('static', filename='css/Student_CSS/students.css') }}">
+    <link rel="stylesheet"
+      href="{{ url_for('static', filename='css/Student_CSS/notifications.css') }}">
+</head>
+
+<body>
+
+<div class="app-container">
+
+    <!-- ================= SIDEBAR ================= -->
+     {% include 'Student/sidebar.html' %}
+
+    <!-- ================= MAIN CONTENT ================= -->
+    <main class="main-content">
+
+
+        <!-- ================= TOP HEADER ================= -->
+        <header class="top-header">
+
+            <div class="header-left">
+
+                <button class="mobile-menu">
+                    <i class="bi bi-list"></i>
+                </button>
+
+                <div>
+                    <h1>Academic Profile</h1>
+
+                    <p>
+                        Track your academic records, attendance, and coursework progress
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="header-right">
+
+                <!-- Notification Dropdown -->
+                {% include 'Student/notifications_widget.html' %}
+
+                <!-- Profile -->
+                <div class="student-profile">
+
+                    <div class="profile-avatar" style="overflow: hidden; border-radius: 50%;">
+                        {% if current_avatar %}
+                            <img src="{{ current_avatar }}" alt="{{ student.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% elif student and student.profile_pic %}
+                            <img src="{{ url_for('static', filename=student.profile_pic) }}" alt="{{ student.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            <i class="bi bi-person-fill"></i>
+                        {% endif %}
+                    </div>
+
+                   <div class="profile-info">
+                       <strong>{{ student.name }}</strong>
+                       <span>Student</span>
+                   </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- ================= WELCOME BANNER ================= -->
+        <section class="welcome-banner">
+
+            <div class="welcome-content">
+
+                <span class="welcome-label">
+                    Welcome back 👋
+                </span>
+
+                <h2>Hello, {{ student.name }}!</h2>
+
+                <p>
+                    Here's your academic performance overview in {{ student.department }} (Semester {{ student.semester }}).
+                    Keep up the great work!
+                </p>
+
+            </div>
+
+            <div class="welcome-illustration">
+                <i class="bi bi-mortarboard-fill"></i>
+            </div>
+
+        </section>
+
+
+        <!-- ================= QUICK ACCESS ================= -->
+        <section class="dashboard-section">
+
+            <div class="section-header">
+
+                <div>
+                    <h2>Quick Access</h2>
+                    <p>Access your important academic information</p>
+                </div>
+
+                <a href="#">View All</a>
+
+            </div>
+
+
+            <div class="quick-access-grid">
+
+                <!-- Performance -->
+                <div class="quick-card purple-card" onclick="window.location.href='/dashboard'" style="cursor: pointer;">
+
+                    <div class="quick-icon">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+
+                    <div class="quick-card-content">
+                        <h3>My Performance</h3>
+                        <p>View your academic performance</p>
+                    </div>
+
+                    <i class="bi bi-chevron-right card-arrow"></i>
+
+                </div>
+
+
+                <!-- Attendance -->
+                <div class="quick-card green-card" onclick="window.location.href='/attendance'" style="cursor: pointer;">
+
+                    <div class="quick-icon">
+                        <i class="bi bi-calendar-check"></i>
+                    </div>
+
+                    <div class="quick-card-content">
+                        <h3>Attendance</h3>
+                        <p>Check your attendance</p>
+                    </div>
+
+                    <i class="bi bi-chevron-right card-arrow"></i>
+
+                </div>
+
+
+                <!-- Reports -->
+                <div class="quick-card blue-card" onclick="window.location.href='/reports'" style="cursor: pointer;">
+
+                    <div class="quick-icon">
+                        <i class="bi bi-file-earmark-bar-graph"></i>
+                    </div>
+
+                    <div class="quick-card-content">
+                        <h3>My Reports</h3>
+                        <p>View academic records</p>
+                    </div>
+
+                    <i class="bi bi-chevron-right card-arrow"></i>
+
+                </div>
+
+
+                <!-- AI Insights -->
+                <div class="quick-card pink-card" onclick="window.location.href='/analytics'" style="cursor: pointer;">
+
+                    <div class="quick-icon">
+                        <i class="bi bi-lightbulb"></i>
+                    </div>
+
+                    <div class="quick-card-content">
+                        <h3>AI Insights</h3>
+                        <p>Get personalized recommendations</p>
+                    </div>
+
+                    <i class="bi bi-chevron-right card-arrow"></i>
+
+                </div>
+
+
+                <!-- Subjects -->
+                <div class="quick-card orange-card" onclick="window.location.href='/analytics'" style="cursor: pointer;">
+
+                    <div class="quick-icon">
+                        <i class="bi bi-book"></i>
+                    </div>
+
+                    <div class="quick-card-content">
+                        <h3>Subjects</h3>
+                        <p>Analyze subject performance</p>
+                    </div>
+
+                    <i class="bi bi-chevron-right card-arrow"></i>
+
+                </div>
+
+
+                <!-- Reports -->
+                <div class="quick-card yellow-card" onclick="window.location.href='/reports'" style="cursor: pointer;">
+
+                    <div class="quick-icon">
+                        <i class="bi bi-file-earmark-text"></i>
+                    </div>
+
+                    <div class="quick-card-content">
+                        <h3>My Reports</h3>
+                        <p>View performance reports</p>
+                    </div>
+
+                    <i class="bi bi-chevron-right card-arrow"></i>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= PERFORMANCE OVERVIEW ================= -->
+        <section class="dashboard-section">
+
+            <div class="section-header">
+
+                <div>
+                    <h2>Performance Overview</h2>
+                    <p>Your current academic performance</p>
+                </div>
+
+            </div>
+
+
+            <div class="kpi-grid">
+
+                <!-- Overall Score -->
+                <div class="kpi-card">
+
+                    <div class="kpi-icon purple">
+                        <i class="bi bi-award"></i>
+                    </div>
+
+                    <div>
+                        <span>Overall Score</span>
+                        <h3>{{ average_marks }}%</h3>
+                        <small class="positive">
+                            <i class="bi bi-arrow-up"></i>
+                            Based on course marks
+                        </small>
+                    </div>
+
+                </div>
+
+
+                <!-- Attendance -->
+                <div class="kpi-card">
+
+                    <div class="kpi-icon green">
+                        <i class="bi bi-calendar-check"></i>
+                    </div>
+
+                    <div>
+                        <span>Attendance</span>
+                        <h3>{{ average_attendance }}%</h3>
+                        <small class="positive">
+                            {% if average_attendance >= 85 %}Good attendance{% else %}Needs improvement{% endif %}
+                        </small>
+                    </div>
+
+                </div>
+
+
+                <!-- Prediction -->
+                <div class="kpi-card">
+
+                    <div class="kpi-icon blue">
+                        <i class="bi bi-stars"></i>
+                    </div>
+
+                    <div>
+                        <span>Predicted Score</span>
+                        <h3>{{ predicted_score }}%</h3>
+                        <small class="positive">
+                            ML Model Output
+                        </small>
+                    </div>
+
+                </div>
+
+
+                <!-- Status -->
+                <div class="kpi-card">
+
+                    <div class="kpi-icon orange">
+                        <i class="bi bi-speedometer2"></i>
+                    </div>
+
+                    <div>
+                        <span>Performance Status</span>
+                        <h3>{% if average_marks >= 75 %}Good{% elif average_marks >= 50 %}Average{% else %}Needs Attention{% endif %}</h3>
+                        <small class="positive">
+                            {% if average_marks >= 75 %}On track{% else %}Focus needed{% endif %}
+                        </small>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= CHART + PREDICTION ================= -->
+        <section class="dashboard-grid">
+
+
+            <!-- Performance Trend -->
+            <div class="dashboard-card performance-chart-card">
+
+                <div class="card-header">
+
+                    <div>
+                        <h2>Performance Trend</h2>
+                        <p>Your academic progress over time</p>
+                    </div>
+
+                    <select class="chart-filter">
+                        <option>Last 6 Months</option>
+                        <option>Last 3 Months</option>
+                        <option>This Year</option>
+                    </select>
+
+                </div>
+
+                <div class="chart-container">
+
+                    <canvas id="performanceChart"></canvas>
+
+                </div>
+
+            </div>
+
+
+            <!-- Academic Standing -->
+            <div class="dashboard-card" style="background: white; border-radius: 18px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.04);">
+
+                <div class="card-header">
+
+                    <div>
+                        <h2>Academic Status</h2>
+                        <p>Enrolled semester status</p>
+                    </div>
+
+                    <div class="prediction-badge" style="background: #ede9fe; color: #5B3DF5;">
+                        Active
+                    </div>
+
+                </div>
+
+                <div class="prediction-content" style="padding: 20px 0;">
+
+                    <div class="prediction-circle" style="background: #f5f3ff; color: #4338ca; border-color: #c4b5fd;">
+                        <strong>Sem {{ student.semester }}</strong>
+                        <span>Current</span>
+                    </div>
+
+                    <div class="prediction-message">
+
+                        <h3>Academic Standing: Good</h3>
+
+                        <p>
+                            You are actively enrolled in {{ student.department }} (Semester {{ student.semester }}).
+                            All coursework and class evaluations are in good standing.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="prediction-footer">
+
+                    <span>
+                        <i class="bi bi-info-circle"></i>
+                        Official Academic Record • StudentIQ
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= AI INSIGHT ================= -->
+        <section class="dashboard-section">
+
+            <div class="ai-insight-card">
+
+                <div class="ai-icon">
+                    <i class="bi bi-stars"></i>
+                </div>
+
+                <div class="ai-content">
+
+                    <span>AI Performance Insight</span>
+
+                    <h2>
+                        You're making good progress!
+                    </h2>
+
+                    <p>
+                        Your overall performance has improved by
+                        <strong>8%</strong> over the last assessment.
+                        Your attendance is strong, but your Mathematics
+                        performance is slightly below your average.
+                    </p>
+
+                    <div class="ai-recommendation">
+
+                        <i class="bi bi-lightbulb"></i>
+
+                        <span>
+                            <strong>Recommendation:</strong>
+                            Spend additional practice time on Mathematics
+                            to improve your overall score.
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <button class="ai-action">
+                    View Insights
+                    <i class="bi bi-arrow-right"></i>
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= SUBJECT + ASSESSMENTS ================= -->
+        <section class="dashboard-grid">
+
+
+            <!-- Subject Performance -->
+            <div class="dashboard-card">
+
+                <div class="card-header">
+
+                    <div>
+                        <h2>Subject Performance</h2>
+                        <p>Your performance by subject</p>
+                    </div>
+
+                    <a href="#">View Details</a>
+
+                </div>
+
+
+                <div class="subject-list">
+
+                    <div class="subject-item">
+
+                        <div class="subject-info">
+                            <span>Data Analytics</span>
+                            <strong>88%</strong>
+                        </div>
+
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width:88%"></div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="subject-item">
+
+                        <div class="subject-info">
+                            <span>DBMS</span>
+                            <strong>91%</strong>
+                        </div>
+
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width:91%"></div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="subject-item">
+
+                        <div class="subject-info">
+                            <span>Python</span>
+                            <strong>74%</strong>
+                        </div>
+
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width:74%"></div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="subject-item">
+
+                        <div class="subject-info">
+                            <span>Statistics</span>
+                            <strong>79%</strong>
+                        </div>
+
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width:79%"></div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Upcoming Assessments -->
+            <div class="dashboard-card">
+
+                <div class="card-header">
+
+                    <div>
+                        <h2>Upcoming Assessments</h2>
+                        <p>Stay prepared</p>
+                    </div>
+
+                    <a href="#">View All</a>
+
+                </div>
+
+
+                <div class="assessment-list">
+
+                    <div class="assessment-item">
+
+                        <div class="assessment-date">
+                            <strong>15</strong>
+                            <span>AUG</span>
+                        </div>
+
+                        <div class="assessment-info">
+                            <h3>Data Analytics Assignment</h3>
+                            <span>
+                                <i class="bi bi-clock"></i>
+                                Due Tomorrow
+                            </span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="assessment-item">
+
+                        <div class="assessment-date">
+                            <strong>18</strong>
+                            <span>AUG</span>
+                        </div>
+
+                        <div class="assessment-info">
+                            <h3>DBMS Internal Test</h3>
+                            <span>
+                                <i class="bi bi-clock"></i>
+                                10:00 AM
+                            </span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="assessment-item">
+
+                        <div class="assessment-date">
+                            <strong>22</strong>
+                            <span>AUG</span>
+                        </div>
+
+                        <div class="assessment-info">
+                            <h3>Python Practical</h3>
+                            <span>
+                                <i class="bi bi-clock"></i>
+                                11:00 AM
+                            </span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- JavaScript -->
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+</body>
+</html>

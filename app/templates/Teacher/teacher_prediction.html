@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predictive Analytics | StudentIQ</title>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Teacher Stylesheets -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Teacher_CSS/teacher_sidebar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Teacher_CSS/teacher_students.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Student_CSS/prediction.css') }}">
+
+    <style>
+        .teacher-predict-container {
+            padding: 30px;
+        }
+        .student-select-card {
+            background: white;
+            border-radius: 18px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            border: 1px solid #eef0f6;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .select-group {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex: 1;
+            min-width: 320px;
+        }
+        .select-group label {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        .student-dropdown {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            color: #334155;
+            background: #f8fafc;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .student-dropdown:focus {
+            border-color: #5B3DF5;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(91, 61, 245, 0.12);
+        }
+        .student-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: #ede9fe;
+            border-radius: 8px;
+            color: #4338ca;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .forecast-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        @media (max-width: 992px) {
+            .forecast-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .metric-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-low { background: #dcfce7; color: #15803d; }
+        .badge-medium { background: #fef9c3; color: #a16207; }
+        .badge-high { background: #fee2e2; color: #b91c1c; }
+        .action-save-btn {
+            background: #059669;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+        .action-save-btn:hover {
+            background: #047857;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="teacher-layout">
+
+    {% include 'Teacher/teacher_sidebar.html' %}
+
+    <main class="teacher-main">
+
+        <!-- TOP BAR -->
+        <header class="topbar">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" id="predictStudentSearch" placeholder="Search students for prediction...">
+            </div>
+
+            <div class="topbar-right">
+                <div class="teacher-profile">
+                    <div class="teacher-avatar" style="overflow: hidden; border-radius: 50%;">
+                        {% if current_avatar %}
+                            <img src="{{ current_avatar }}" alt="Faculty" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% elif teacher and teacher.profile_pic %}
+                            <img src="{{ url_for('static', filename=teacher.profile_pic) }}" alt="Faculty" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            <i class="bi bi-person-workspace"></i>
+                        {% endif %}
+                    </div>
+                    <div class="teacher-info">
+                        <strong>{{ teacher.name if teacher else 'Teacher' }}</strong>
+                        <span>Faculty Member</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="teacher-predict-container">
+
+            <!-- PAGE HEADER -->
+            <section class="page-heading" style="margin-bottom: 24px;">
+                <div>
+                    <span class="page-label" style="color: #5B3DF5; font-weight: 700; font-size: 11px; letter-spacing: 1px;">
+                        <i class="bi bi-cpu-fill"></i> MACHINE LEARNING BENCH
+                    </span>
+                    <h1 style="font-size: 28px; font-weight: 700; color: #1e293b; margin: 4px 0;">
+                        Student Performance Prediction
+                    </h1>
+                    <p style="color: #64748b; font-size: 14px; margin: 0;">
+                        Predict student academic scores, classify failure risks, and model intervention scenarios.
+                    </p>
+                </div>
+            </section>
+
+            <!-- FLASH MESSAGES -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div style="padding: 14px 20px; margin-bottom: 20px; border-radius: 12px; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; background: {% if category == 'success' %}#ecfdf5; color: #065f46; border: 1px solid #a7f3d0{% elif category == 'danger' %}#fef2f2; color: #991b1b; border: 1px solid #fecaca{% else %}#fffbeb; color: #92400e; border: 1px solid #fde68a{% endif %};">
+                            <i class="bi bi-info-circle-fill"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- STUDENT SELECTOR CARD -->
+            <div class="student-select-card">
+                <div class="select-group">
+                    <label for="studentSelect">
+                        <i class="bi bi-person-lines-fill" style="color: #5B3DF5;"></i> Select Student:
+                    </label>
+                    <select id="studentSelect" class="student-dropdown">
+                        <option value="">-- Select Registered Student --</option>
+                        {% for s in students %}
+                            <option
+                                value="{{ s.id }}"
+                                data-name="{{ s.name }}"
+                                data-dept="{{ s.department }}"
+                                data-sem="{{ s.semester }}"
+                                data-gender="{{ s.gender or 'Female' }}"
+                                data-marks="{{ s.average_marks or 75 }}"
+                                data-att="{{ s.average_attendance or 85 }}"
+                                {% if selected_student_id and selected_student_id == s.id %}selected{% endif %}
+                            >
+                                {{ s.name }} ({{ s.department }} - Sem {{ s.semester }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div id="selectedStudentBadge" class="student-chip" style="display: none;">
+                    <i class="bi bi-mortarboard"></i>
+                    <span id="selectedStudentNameText">Student Selected</span>
+                </div>
+            </div>
+
+            <!-- FORECAST GRID -->
+            <div class="forecast-grid">
+
+                <!-- INPUT CARD -->
+                <div class="prediction-card input-card">
+                    <div class="card-heading">
+                        <div class="heading-icon" style="background: #ede9fe; color: #5B3DF5; border-radius: 12px; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px;">
+                            <i class="bi bi-sliders" style="font-size: 20px;"></i>
+                        </div>
+                        <div>
+                            <h3 style="margin: 0; font-size: 18px;">Predictor Parameters</h3>
+                            <p style="margin: 0; font-size: 12px; color: #64748b;">Adjust attributes to simulate academic progress</p>
+                        </div>
+                    </div>
+
+                    <form id="predictionForm">
+                        <input type="hidden" id="studentIdInput" name="student_id" value="{{ selected_student_id or '' }}">
+
+                        <!-- Attendance Slider -->
+                        <div class="input-group" style="margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                <label style="font-weight: 600; font-size: 13px; color: #334155;">
+                                    <i class="bi bi-calendar-check text-primary"></i> Attendance Percentage
+                                </label>
+                                <span id="attendanceValue" style="font-weight: 700; color: #5B3DF5;">85%</span>
+                            </div>
+                            <input type="range" id="attendance" name="attendance" min="0" max="100" value="85" style="width: 100%; accent-color: #5B3DF5;">
+                        </div>
+
+                        <!-- Study Hours Slider -->
+                        <div class="input-group" style="margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                <label style="font-weight: 600; font-size: 13px; color: #334155;">
+                                    <i class="bi bi-book text-success"></i> Study Hours / Week
+                                </label>
+                                <span id="studyHoursValue" style="font-weight: 700; color: #5B3DF5;">15 hrs</span>
+                            </div>
+                            <input type="range" id="studyHours" name="studyHours" min="1" max="45" value="15" style="width: 100%; accent-color: #5B3DF5;">
+                        </div>
+
+                        <!-- Previous Marks Slider -->
+                        <div class="input-group" style="margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                <label style="font-weight: 600; font-size: 13px; color: #334155;">
+                                    <i class="bi bi-file-earmark-bar-graph text-info"></i> Previous Exam Marks
+                                </label>
+                                <span id="previousMarksValue" style="font-weight: 700; color: #5B3DF5;">75%</span>
+                            </div>
+                            <input type="range" id="previousMarks" name="previousMarks" min="0" max="100" value="75" style="width: 100%; accent-color: #5B3DF5;">
+                        </div>
+
+                        <!-- Sleep Duration Slider -->
+                        <div class="input-group" style="margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                <label style="font-weight: 600; font-size: 13px; color: #334155;">
+                                    <i class="bi bi-moon-stars text-info"></i> Sleep Duration
+                                </label>
+                                <span id="sleepDurationValue" style="font-weight: 700; color: #5B3DF5;">7 hrs</span>
+                            </div>
+                            <input type="range" id="sleepDuration" name="sleep_duration" min="4" max="12" step="0.5" value="7" style="width: 100%; accent-color: #5B3DF5;">
+                        </div>
+
+                        <!-- Social Media Usage Slider -->
+                        <div class="input-group" style="margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                <label style="font-weight: 600; font-size: 13px; color: #334155;">
+                                    <i class="bi bi-phone text-warning"></i> Social Media Usage
+                                </label>
+                                <span id="socialMediaValue" style="font-weight: 700; color: #5B3DF5;">2 hrs</span>
+                            </div>
+                            <input type="range" id="socialMedia" name="social_media" min="0" max="10" step="0.5" value="2" style="width: 100%; accent-color: #5B3DF5;">
+                        </div>
+
+                        <!-- Motivation Level -->
+                        <div style="margin-bottom: 24px;">
+                            <label for="participation" style="display: block; font-weight: 600; font-size: 13px; color: #334155; margin-bottom: 6px;">
+                                <i class="bi bi-fire" style="color: #ea580c;"></i> Motivation Level
+                            </label>
+                            <select id="participation" name="participation" style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 13px;">
+                                <option value="high">High</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="low">Low</option>
+                            </select>
+                        </div>
+
+                        <button type="button" id="predictBtn" class="primary-btn" style="width: 100%; justify-content: center; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 600; background: linear-gradient(135deg, #6C63FF, #5B3DF5); color: white; border: none; cursor: pointer;">
+                            <i class="bi bi-lightning-charge-fill"></i>
+                            Run Performance Forecast
+                        </button>
+                    </form>
+                </div>
+
+                <!-- OUTPUT & ANALYSIS CARD -->
+                <div class="prediction-card output-card">
+                    <div class="card-heading">
+                        <div class="heading-icon" style="background: #ecfdf5; color: #059669; border-radius: 12px; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px;">
+                            <i class="bi bi-stars" style="font-size: 20px;"></i>
+                        </div>
+                        <div>
+                            <h3 style="margin: 0; font-size: 18px;">Forecast Intelligence</h3>
+                            <p style="margin: 0; font-size: 12px; color: #64748b;">Explainable Random Forest model prediction</p>
+                        </div>
+                    </div>
+
+                    <!-- PREDICTION RESULT DISPLAY -->
+                    <div style="background: #f8fafc; border-radius: 16px; padding: 22px; text-align: center; margin-bottom: 20px; border: 1px solid #e2e8f0;">
+                        <span style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">
+                            Predicted Performance / Predicted Exam Score
+                        </span>
+                        <div style="margin: 10px 0;">
+                            <span id="predictedScore" style="font-size: 52px; font-weight: 800; color: #4338ca; line-height: 1;">{{ result.predicted_score if result else (latest_prediction.predicted_score|int if latest_prediction else '--') }}</span>
+                            <span style="font-size: 26px; font-weight: 700; color: #6366f1;">%</span>
+                        </div>
+                        <div style="display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
+                            <span id="statusBadge" class="metric-badge {% if result and 'Excellent' in result.status %}badge-low{% elif result and 'Good' in result.status %}badge-low{% elif result and 'Average' in result.status %}badge-medium{% else %}badge-medium{% endif %}" style="font-size: 12px;">
+                                {{ result.performance_category if result else (latest_prediction.performance_level if latest_prediction else 'Awaiting Forecast') }}
+                            </span>
+                            <span id="thresholdBadge" class="metric-badge" style="background: {% if result and result.meets_85_threshold %}#dcfce7; color: #15803d; border: 1px solid #86efac;{% else %}#e2e8f0; color: #475569;{% endif %} font-size: 12px;">
+                                <i class="bi bi-award-fill"></i> <span id="thresholdBadgeText">{{ result.threshold if result else ('85%+' if (latest_prediction and latest_prediction.predicted_score >= 85) else '<85%') }}</span>
+                            </span>
+                            <span id="riskBadge" class="metric-badge {% if result and 'High' in result.risk_level %}badge-high{% elif result and 'Mod' in result.risk_level %}badge-medium{% else %}badge-low{% endif %}" style="font-size: 12px;">
+                                <i class="bi bi-shield-check"></i> <span id="riskBadgeText">{{ result.risk_level if result else (latest_prediction.risk_level if latest_prediction else 'Low Risk') }}</span>
+                            </span>
+                        </div>
+                        <p id="predictionDescription" style="margin: 10px 0 0 0; font-size: 12px; color: #64748b; line-height: 1.4;">
+                            {{ result.description if result else 'Adjust student parameters and run the forecast to view explainable Random Forest evaluation.' }}
+                        </p>
+                    </div>
+
+                    <!-- PARAMETER ANALYSIS SECTION -->
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="margin: 0 0 10px 0; font-size: 13px; font-weight: 700; color: #1e293b;">
+                            <i class="bi bi-bar-chart-steps" style="color: #5B3DF5;"></i> Parameter Analysis:
+                        </h4>
+                        <div id="parameterAnalysisGrid" style="display: flex; flex-direction: column; gap: 8px;">
+                            <!-- Attendance -->
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-weight: 600; font-size: 12px; color: #1e293b;">Attendance:</span>
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <strong id="paramValAttendance" style="color: #4338ca; font-size: 12px;">85%</strong>
+                                        <span id="paramStatusAttendance" class="metric-badge badge-low" style="padding: 2px 7px; font-size: 11px;">Good</span>
+                                    </div>
+                                </div>
+                                <div id="paramMsgAttendance" style="font-size: 11px; color: #64748b; margin-top: 3px;">
+                                    Attendance meets recommended high-performance benchmarks.
+                                </div>
+                            </div>
+                            <!-- Study Hours -->
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-weight: 600; font-size: 12px; color: #1e293b;">Study Hours:</span>
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <strong id="paramValStudy" style="color: #4338ca; font-size: 12px;">15 hrs/week</strong>
+                                        <span id="paramStatusStudy" class="metric-badge badge-low" style="padding: 2px 7px; font-size: 11px;">Good</span>
+                                    </div>
+                                </div>
+                                <div id="paramMsgStudy" style="font-size: 11px; color: #64748b; margin-top: 3px;">
+                                    Study routine is steady; increasing toward 16+ hrs/week can bolster outcomes.
+                                </div>
+                            </div>
+                            <!-- Previous Marks -->
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-weight: 600; font-size: 12px; color: #1e293b;">Previous Marks:</span>
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <strong id="paramValMarks" style="color: #4338ca; font-size: 12px;">75%</strong>
+                                        <span id="paramStatusMarks" class="metric-badge badge-medium" style="padding: 2px 7px; font-size: 11px;">Moderate</span>
+                                    </div>
+                                </div>
+                                <div id="paramMsgMarks" style="font-size: 11px; color: #64748b; margin-top: 3px;">
+                                    Moderate prior scores; targeted revision will help.
+                                </div>
+                            </div>
+                            <!-- Sleep Duration -->
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-weight: 600; font-size: 12px; color: #1e293b;">Sleep:</span>
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <strong id="paramValSleep" style="color: #4338ca; font-size: 12px;">7 hrs/day</strong>
+                                        <span id="paramStatusSleep" class="metric-badge badge-low" style="padding: 2px 7px; font-size: 11px;">Optimal</span>
+                                    </div>
+                                </div>
+                                <div id="paramMsgSleep" style="font-size: 11px; color: #64748b; margin-top: 3px;">
+                                    Sleep duration is within the recommended range.
+                                </div>
+                            </div>
+                            <!-- Social Media -->
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-weight: 600; font-size: 12px; color: #1e293b;">Social Media:</span>
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <strong id="paramValSocial" style="color: #4338ca; font-size: 12px;">2 hrs/day</strong>
+                                        <span id="paramStatusSocial" class="metric-badge badge-low" style="padding: 2px 7px; font-size: 11px;">Low</span>
+                                    </div>
+                                </div>
+                                <div id="paramMsgSocial" style="font-size: 11px; color: #64748b; margin-top: 3px;">
+                                    Social media usage is within a favorable range.
+                                </div>
+                            </div>
+                            <!-- Motivation Level -->
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-weight: 600; font-size: 12px; color: #1e293b;">Motivation:</span>
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <strong id="paramValMotivation" style="color: #4338ca; font-size: 12px;">Medium</strong>
+                                        <span id="paramStatusMotivation" class="metric-badge badge-medium" style="padding: 2px 7px; font-size: 11px;">Moderate</span>
+                                    </div>
+                                </div>
+                                <div id="paramMsgMotivation" style="font-size: 11px; color: #64748b; margin-top: 3px;">
+                                    Moderate motivation; increasing active participation will help.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RECOMMENDATIONS -->
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; color: #1e293b;">
+                            <i class="bi bi-lightbulb-fill" style="color: #f59e0b;"></i> Recommendations:
+                        </h4>
+                        <div id="recommendationText" style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 12px 16px; font-size: 12px; color: #92400e; line-height: 1.5;">
+                            {{ result.recommendation if result else 'Select a student and adjust parameters to view machine learning recommendations.' }}
+                        </div>
+                    </div>
+
+                    <!-- INDICATORS ASSOCIATED WITH STRONG PERFORMANCE -->
+                    <div style="margin-bottom: 20px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 14px;">
+                        <h4 style="margin: 0 0 6px 0; font-size: 12px; font-weight: 700; color: #166534;">
+                            <i class="bi bi-shield-star-fill"></i> Indicators Associated With Strong Performance:
+                        </h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 11px; margin: 8px 0;">
+                            <div><strong style="color: #14532d;">Attendance:</strong> 85–90%+</div>
+                            <div><strong style="color: #14532d;">Study Hours:</strong> 16+ hrs/week</div>
+                            <div><strong style="color: #14532d;">Previous Marks:</strong> 85%+</div>
+                            <div><strong style="color: #14532d;">Sleep:</strong> 7–9 hrs/day</div>
+                            <div><strong style="color: #14532d;">Social Media:</strong> &le; 2 hrs/day</div>
+                            <div><strong style="color: #14532d;">Motivation:</strong> High</div>
+                        </div>
+                        <p style="margin: 6px 0 0 0; font-size: 10.5px; color: #15803d; line-height: 1.35; font-style: italic;">
+                            These conditions represent a stronger academic profile. The final prediction is generated by the trained Random Forest model.
+                        </p>
+                    </div>
+
+                    <!-- MODEL FEATURE IMPORTANCE -->
+                    <div style="margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <h4 style="margin: 0; font-size: 12px; font-weight: 700; color: #1e293b;">
+                                <i class="bi bi-diagram-3-fill" style="color: #6366f1;"></i> Model Feature Importance:
+                            </h4>
+                            <span style="font-size: 11px; color: #64748b;">Trained Random Forest</span>
+                        </div>
+                        <div id="featureImportanceGrid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 11px;">
+                            <div style="background: #f1f5f9; padding: 6px 10px; border-radius: 6px; display: flex; justify-content: space-between;">
+                                <span>Attendance:</span> <strong>42.2%</strong>
+                            </div>
+                            <div style="background: #f1f5f9; padding: 6px 10px; border-radius: 6px; display: flex; justify-content: space-between;">
+                                <span>Social Media:</span> <strong>13.9%</strong>
+                            </div>
+                            <div style="background: #f1f5f9; padding: 6px 10px; border-radius: 6px; display: flex; justify-content: space-between;">
+                                <span>Study Hours:</span> <strong>13.7%</strong>
+                            </div>
+                            <div style="background: #f1f5f9; padding: 6px 10px; border-radius: 6px; display: flex; justify-content: space-between;">
+                                <span>Previous Scores:</span> <strong>7.9%</strong>
+                            </div>
+                            <div style="background: #f1f5f9; padding: 6px 10px; border-radius: 6px; display: flex; justify-content: space-between;">
+                                <span>Tutoring Sessions:</span> <strong>3.2%</strong>
+                            </div>
+                            <div style="background: #f1f5f9; padding: 6px 10px; border-radius: 6px; display: flex; justify-content: space-between;">
+                                <span>Resources Access:</span> <strong>2.9%</strong>
+                            </div>
+                            <div style="background: #f1f5f9; padding: 6px 10px; border-radius: 6px; display: flex; justify-content: space-between;">
+                                <span>Parental Involvement:</span> <strong>2.6%</strong>
+                            </div>
+                            <div style="background: #f1f5f9; padding: 6px 10px; border-radius: 6px; display: flex; justify-content: space-between;">
+                                <span>Sleep Hours:</span> <strong>2.1%</strong>
+                            </div>
+                        </div>
+                        <p style="margin: 6px 0 0 0; font-size: 10.5px; color: #64748b; line-height: 1.35;">
+                            Feature importance describes how the trained model uses features. It reflects predictive reliance in the model rather than individual causal proof.
+                        </p>
+                    </div>
+
+                    <!-- Hidden Legacy Factor Element Bindings for Compatibility -->
+                    <div style="display: none;">
+                        <span id="factorAtt">85%</span>
+                        <span id="factorHours">15 hrs</span>
+                        <span id="factorMarks">75%</span>
+                        <span id="factorSleep">7 hrs</span>
+                        <span id="factorSocial">2 hrs</span>
+                    </div>
+
+                    <div id="saveAlert" style="display: none; padding: 12px 16px; border-radius: 10px; background: #ecfdf5; color: #065f46; font-size: 13px; font-weight: 500; margin-top: 15px; border: 1px solid #a7f3d0;">
+                        <i class="bi bi-check-circle-fill"></i> Forecast successfully recorded in student's academic history.
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+<script>
+    // Sliders sync
+    const sliders = [
+        { id: 'attendance', display: 'attendanceValue', suffix: '%' },
+        { id: 'studyHours', display: 'studyHoursValue', suffix: ' hrs' },
+        { id: 'previousMarks', display: 'previousMarksValue', suffix: '%' },
+        { id: 'sleepDuration', display: 'sleepDurationValue', suffix: ' hrs' },
+        { id: 'socialMedia', display: 'socialMediaValue', suffix: ' hrs' }
+    ];
+
+    sliders.forEach(item => {
+        const input = document.getElementById(item.id);
+        const display = document.getElementById(item.display);
+        if (input && display) {
+            input.addEventListener('input', () => {
+                display.textContent = input.value + item.suffix;
+            });
+        }
+    });
+
+    // Student selection auto-fill
+    const studentSelect = document.getElementById('studentSelect');
+    const studentIdInput = document.getElementById('studentIdInput');
+    const badge = document.getElementById('selectedStudentBadge');
+    const badgeText = document.getElementById('selectedStudentNameText');
+
+    function applySelectedStudent() {
+        if (!studentSelect.value) {
+            badge.style.display = 'none';
+            studentIdInput.value = '';
+            return;
+        }
+        const opt = studentSelect.options[studentSelect.selectedIndex];
+        studentIdInput.value = studentSelect.value;
+        badgeText.textContent = opt.dataset.name + ' (' + opt.dataset.dept + ')';
+        badge.style.display = 'inline-flex';
+
+        // Prepopulate metrics
+        if (opt.dataset.att) {
+            document.getElementById('attendance').value = Math.round(parseFloat(opt.dataset.att));
+            document.getElementById('attendanceValue').textContent = Math.round(parseFloat(opt.dataset.att)) + '%';
+        }
+        if (opt.dataset.marks) {
+            document.getElementById('previousMarks').value = Math.round(parseFloat(opt.dataset.marks));
+            document.getElementById('previousMarksValue').textContent = Math.round(parseFloat(opt.dataset.marks)) + '%';
+        }
+    }
+
+    studentSelect.addEventListener('change', applySelectedStudent);
+    if (studentSelect.value) {
+        applySelectedStudent();
+    }
+
+    // Topbar search filter for student dropdown
+    const topSearch = document.querySelector('.search-box input');
+    if (topSearch) {
+        topSearch.addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase().trim();
+            if (!query) return;
+            for (let i = 0; i < studentSelect.options.length; i++) {
+                const opt = studentSelect.options[i];
+                if (opt.value && opt.text.toLowerCase().includes(query)) {
+                    studentSelect.selectedIndex = i;
+                    applySelectedStudent();
+                    break;
+                }
+            }
+        });
+    }
+
+    // Prediction trigger
+    const predictBtn = document.getElementById('predictBtn');
+    predictBtn.addEventListener('click', async () => {
+        predictBtn.disabled = true;
+        predictBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Computing Forecast...';
+
+        const payload = {
+            student_id: studentIdInput.value || null,
+            attendance: parseFloat(document.getElementById('attendance').value),
+            study_hours: parseFloat(document.getElementById('studyHours').value),
+            previous_marks: parseFloat(document.getElementById('previousMarks').value),
+            sleep_duration: parseFloat(document.getElementById('sleepDuration').value),
+            social_media: parseFloat(document.getElementById('socialMedia').value),
+            participation: document.getElementById('participation').value
+        };
+
+        try {
+            const res = await fetch('/api/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+
+            if (data.success || data.predicted_score !== undefined) {
+                document.getElementById('predictedScore').textContent = data.predicted_score;
+                
+                // Status / Performance Category
+                const statusBadge = document.getElementById('statusBadge');
+                statusBadge.textContent = data.performance_category || data.status || 'Good Performance';
+                statusBadge.className = 'metric-badge';
+                const catLower = (data.performance_category || data.status || '').toLowerCase();
+                if (catLower.includes('excellent')) {
+                    statusBadge.style.background = '#dcfce7';
+                    statusBadge.style.color = '#15803d';
+                } else if (catLower.includes('good')) {
+                    statusBadge.style.background = '#e0f2fe';
+                    statusBadge.style.color = '#0369a1';
+                } else if (catLower.includes('average')) {
+                    statusBadge.style.background = '#fef9c3';
+                    statusBadge.style.color = '#a16207';
+                } else {
+                    statusBadge.style.background = '#fee2e2';
+                    statusBadge.style.color = '#b91c1c';
+                }
+
+                // 85% Threshold Badge
+                const thresholdBadge = document.getElementById('thresholdBadge');
+                const thresholdText = document.getElementById('thresholdBadgeText');
+                if (thresholdText) {
+                    thresholdText.textContent = data.threshold || (data.meets_85_threshold ? '85%+' : '<85%');
+                }
+                if (thresholdBadge) {
+                    if (data.meets_85_threshold) {
+                        thresholdBadge.style.background = '#dcfce7';
+                        thresholdBadge.style.color = '#15803d';
+                        thresholdBadge.style.border = '1px solid #86efac';
+                    } else {
+                        thresholdBadge.style.background = '#e2e8f0';
+                        thresholdBadge.style.color = '#475569';
+                        thresholdBadge.style.border = 'none';
+                    }
+                }
+
+                // Risk Level Badge
+                const riskBadge = document.getElementById('riskBadge');
+                const riskText = document.getElementById('riskBadgeText');
+                if (riskText) riskText.textContent = data.risk_level || 'Low Risk';
+                if (riskBadge) {
+                    riskBadge.className = 'metric-badge';
+                    if ((data.risk_level || '').toLowerCase().includes('high')) {
+                        riskBadge.classList.add('badge-high');
+                    } else if ((data.risk_level || '').toLowerCase().includes('mod')) {
+                        riskBadge.classList.add('badge-medium');
+                    } else {
+                        riskBadge.classList.add('badge-low');
+                    }
+                }
+
+                // Prediction Description
+                const descEl = document.getElementById('predictionDescription');
+                if (descEl) descEl.textContent = data.description || '';
+
+                // Recommendations
+                document.getElementById('recommendationText').textContent =
+                    data.recommendation || 'Continue consistent study schedule and monitor periodic test progress.';
+
+                // Parameter Analysis Badges Helper
+                const getStatusBadgeClass = (st) => {
+                    const s = (st || '').toLowerCase();
+                    if (s.includes('excellent') || s.includes('optimal') || s.includes('strong') || s === 'low') return 'badge-low';
+                    if (s.includes('good') || s.includes('very good')) return 'badge-low';
+                    if (s.includes('moderate') || s.includes('acceptable')) return 'badge-medium';
+                    return 'badge-high';
+                };
+
+                if (data.parameter_analysis) {
+                    const pa = data.parameter_analysis;
+                    if (pa.attendance) {
+                        document.getElementById('paramValAttendance').textContent = pa.attendance.display_value;
+                        const el = document.getElementById('paramStatusAttendance');
+                        el.textContent = pa.attendance.status;
+                        el.className = 'metric-badge ' + getStatusBadgeClass(pa.attendance.status);
+                        document.getElementById('paramMsgAttendance').textContent = pa.attendance.message;
+                    }
+                    if (pa.study_hours) {
+                        document.getElementById('paramValStudy').textContent = pa.study_hours.display_value;
+                        const el = document.getElementById('paramStatusStudy');
+                        el.textContent = pa.study_hours.status;
+                        el.className = 'metric-badge ' + getStatusBadgeClass(pa.study_hours.status);
+                        document.getElementById('paramMsgStudy').textContent = pa.study_hours.message;
+                    }
+                    if (pa.previous_marks) {
+                        document.getElementById('paramValMarks').textContent = pa.previous_marks.display_value;
+                        const el = document.getElementById('paramStatusMarks');
+                        el.textContent = pa.previous_marks.status;
+                        el.className = 'metric-badge ' + getStatusBadgeClass(pa.previous_marks.status);
+                        document.getElementById('paramMsgMarks').textContent = pa.previous_marks.message;
+                    }
+                    if (pa.sleep_duration) {
+                        document.getElementById('paramValSleep').textContent = pa.sleep_duration.display_value;
+                        const el = document.getElementById('paramStatusSleep');
+                        el.textContent = pa.sleep_duration.status;
+                        el.className = 'metric-badge ' + getStatusBadgeClass(pa.sleep_duration.status);
+                        document.getElementById('paramMsgSleep').textContent = pa.sleep_duration.message;
+                    }
+                    if (pa.social_media) {
+                        document.getElementById('paramValSocial').textContent = pa.social_media.display_value;
+                        const el = document.getElementById('paramStatusSocial');
+                        el.textContent = pa.social_media.status;
+                        el.className = 'metric-badge ' + getStatusBadgeClass(pa.social_media.status);
+                        document.getElementById('paramMsgSocial').textContent = pa.social_media.message;
+                    }
+                    if (pa.motivation_level) {
+                        document.getElementById('paramValMotivation').textContent = pa.motivation_level.display_value;
+                        const el = document.getElementById('paramStatusMotivation');
+                        el.textContent = pa.motivation_level.status;
+                        el.className = 'metric-badge ' + getStatusBadgeClass(pa.motivation_level.status);
+                        document.getElementById('paramMsgMotivation').textContent = pa.motivation_level.message;
+                    }
+                }
+
+                // Update legacy factor driver placeholders
+                document.getElementById('factorAtt').textContent = payload.attendance + '%';
+                document.getElementById('factorHours').textContent = payload.study_hours + ' hrs';
+                document.getElementById('factorMarks').textContent = payload.previous_marks + '%';
+                document.getElementById('factorSleep').textContent = payload.sleep_duration + ' hrs';
+                document.getElementById('factorSocial').textContent = payload.social_media + ' hrs';
+
+                const saveAlert = document.getElementById('saveAlert');
+                if (payload.student_id) {
+                    saveAlert.style.display = 'block';
+                    setTimeout(() => { saveAlert.style.display = 'none'; }, 4000);
+                }
+            } else {
+                alert('Prediction failed: ' + (data.error || 'Unknown error'));
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error contacting prediction engine.');
+        } finally {
+            predictBtn.disabled = false;
+            predictBtn.innerHTML = '<i class="bi bi-lightning-charge-fill"></i> Run Performance Forecast';
+        }
+    });
+
+    // Topbar search input for student prediction
+    const predictSearch = document.getElementById('predictStudentSearch');
+    if (predictSearch) {
+        predictSearch.addEventListener('input', function() {
+            const query = predictSearch.value.trim().toLowerCase();
+            const studentDropdown = document.getElementById('student_id');
+            if (!studentDropdown) return;
+            let matchFound = null;
+            for (let i = 1; i < studentDropdown.options.length; i++) {
+                const opt = studentDropdown.options[i];
+                const matches = !query || opt.text.toLowerCase().includes(query);
+                opt.style.display = matches ? '' : 'none';
+                if (matches && !matchFound) {
+                    matchFound = opt;
+                }
+            }
+            if (query && matchFound) {
+                studentDropdown.value = matchFound.value;
+                studentDropdown.dispatchEvent(new Event('change'));
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

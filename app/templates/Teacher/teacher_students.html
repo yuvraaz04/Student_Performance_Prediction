@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Students | StudentIQ</title>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<!-- Teacher CSS -->
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/Teacher_CSS/teacher_sidebar.css') }}">
+
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/Teacher_CSS/teacher_students.css') }}">
+
+</head>
+
+<body>
+
+<div class="teacher-layout">
+
+<!-- =====================================================
+     SIDEBAR
+====================================================== -->
+
+{% include 'Teacher/teacher_sidebar.html' %}
+
+
+<!-- =====================================================
+     MAIN CONTENT
+====================================================== -->
+
+<main class="teacher-main">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div style="padding: 14px 20px; margin: 15px 30px; border-radius: 12px; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; background: {% if category == 'success' %}#ecfdf5; color: #065f46; border: 1px solid #a7f3d0{% elif category == 'danger' %}#fef2f2; color: #991b1b; border: 1px solid #fecaca{% else %}#fffbeb; color: #92400e; border: 1px solid #fde68a{% endif %};">
+                    <i class="bi bi-info-circle-fill"></i>
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+
+    <!-- TOP BAR -->
+
+    <header class="topbar">
+
+        <div class="search-box">
+
+            <i class="bi bi-search"></i>
+
+            <input type="text"
+                   id="topStudentSearch"
+                   placeholder="Search students...">
+
+        </div>
+
+
+        <div class="topbar-right">
+
+            <div class="teacher-profile">
+
+                <div class="teacher-avatar" style="overflow: hidden; border-radius: 50%;">
+                    {% if current_avatar %}
+                        <img src="{{ current_avatar }}" alt="Faculty" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% elif teacher and teacher.profile_pic %}
+                        <img src="{{ url_for('static', filename=teacher.profile_pic) }}" alt="Faculty" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% else %}
+                        <i class="bi bi-person"></i>
+                    {% endif %}
+                </div>
+
+                <div class="teacher-info">
+
+                    <strong>{{ teacher.name if teacher else "Teacher" }}</strong>
+
+                    <span>Teacher</span>
+
+                </div>
+
+                <i class="bi bi-chevron-down profile-arrow"></i>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- =====================================================
+         PAGE HEADING
+    ====================================================== -->
+
+    <section class="page-heading">
+
+        <div>
+
+            <span class="page-label">
+                STUDENT MANAGEMENT
+            </span>
+
+            <h1>Students</h1>
+
+            <p>
+                Manage and monitor student information,
+                performance and academic progress.
+            </p>
+
+        </div>
+
+
+        <button class="primary-btn" type="button" onclick="document.getElementById('addStudentModal').style.display='flex'">
+            <i class="bi bi-person-plus-fill"></i>
+            Add Student
+        </button>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         KPI CARDS
+    ====================================================== -->
+
+    <section class="student-kpi-grid">
+
+
+        <!-- Total -->
+
+        <div class="student-kpi-card">
+
+            <div class="student-kpi-icon blue">
+
+                <i class="bi bi-people-fill"></i>
+
+            </div>
+
+            <div>
+
+                <span>Total Students</span>
+
+                <strong>{{ students|length }}</strong>
+
+                <small>Currently registered</small>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Good Performance -->
+
+        <div class="student-kpi-card">
+
+            <div class="student-kpi-icon green">
+
+                <i class="bi bi-graph-up-arrow"></i>
+
+            </div>
+
+            <div>
+
+                <span>Good Performance</span>
+
+                <strong>
+                    {{ students|selectattr('average_marks', 'ge', 75)|list|length }}
+                </strong>
+
+                <small>75% and above</small>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- At Risk -->
+
+        <div class="student-kpi-card">
+
+            <div class="student-kpi-icon red">
+
+                <i class="bi bi-exclamation-triangle-fill"></i>
+
+            </div>
+
+            <div>
+
+                <span>At Risk</span>
+
+                <strong>
+                    {{ students|selectattr('average_marks', 'lt', 50)|list|length }}
+                </strong>
+
+                <small>Require attention</small>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Average -->
+
+        <div class="student-kpi-card">
+
+            <div class="student-kpi-icon purple">
+
+                <i class="bi bi-bar-chart-fill"></i>
+
+            </div>
+
+            <div>
+
+                <span>Average Performance</span>
+
+                <strong>{{ avg_overall }}%</strong>
+
+                <small>Overall average</small>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         STUDENT TABLE CARD
+    ====================================================== -->
+
+    <section class="students-card">
+
+
+        <!-- CARD HEADER -->
+
+        <div class="students-card-header">
+
+            <div>
+
+                <h2>All Students</h2>
+
+                <p>
+                    View and manage your students
+                </p>
+
+            </div>
+
+
+            <button class="export-btn" type="button" onclick="window.location.href='{{ url_for('export_all_students_csv') }}'">
+
+                <i class="bi bi-download"></i>
+
+                Export
+
+            </button>
+
+        </div>
+
+
+
+        <!-- =================================================
+             FILTERS
+        ================================================== -->
+
+        <div class="student-filters">
+
+
+            <!-- Search -->
+
+            <div class="table-search">
+
+                <i class="bi bi-search"></i>
+
+                <input
+                    type="text"
+                    id="studentSearch"
+                    placeholder="Search by name or ID..."
+                >
+
+            </div>
+
+
+
+            <!-- Course -->
+
+            <select id="courseFilter">
+
+                <option value="">All Courses</option>
+
+                <option value="Computer Science">
+                    Computer Science
+                </option>
+
+                <option value="Information Technology">
+                    Information Technology
+                </option>
+
+                <option value="Data Science">
+                    Data Science
+                </option>
+
+            </select>
+
+
+
+            <!-- Semester -->
+
+            <select id="semesterFilter">
+
+                <option value="">All Semesters</option>
+
+                <option value="1">Semester 1</option>
+                <option value="2">Semester 2</option>
+                <option value="3">Semester 3</option>
+                <option value="4">Semester 4</option>
+                <option value="5">Semester 5</option>
+                <option value="6">Semester 6</option>
+
+            </select>
+
+
+
+            <!-- Risk -->
+
+            <select id="riskFilter">
+
+                <option value="">All Risk Levels</option>
+
+                <option value="low">
+                    Low Risk
+                </option>
+
+                <option value="medium">
+                    Medium Risk
+                </option>
+
+                <option value="high">
+                    High Risk
+                </option>
+
+            </select>
+
+        </div>
+
+
+
+        <!-- =================================================
+             TABLE
+        ================================================== -->
+
+        <div class="table-wrapper">
+
+            <table id="studentsTable">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Student</th>
+
+                        <th>Student ID</th>
+
+                        <th>Course</th>
+
+                        <th>Semester</th>
+
+                        <th>Attendance</th>
+
+                        <th>Performance</th>
+
+                        <th>Risk Level</th>
+
+                        <th>Action</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                {% for student in students %}
+
+                    <tr>
+
+                        <!-- STUDENT -->
+
+                        <td>
+
+                            <div class="student-cell">
+
+                                <div class="table-avatar avatar-purple">
+
+                                    {{ student.name[:2]|upper }}
+
+                                </div>
+
+                                <div>
+
+                                    <strong>
+                                        {{ student.name }}
+                                    </strong>
+
+                                    <span>
+                                        {{ student.email }}{% if student.phone %} • <i class="bi bi-telephone-fill" style="font-size: 10px;"></i> {{ student.phone }}{% endif %}
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+
+                        <!-- STUDENT ID -->
+
+                        <td>
+
+                            STU{{ "%03d"|format(student.id) }}
+
+                        </td>
+
+
+
+                        <!-- COURSE -->
+
+                        <td>
+
+                            {{ student.department }}
+
+                        </td>
+
+
+
+                        <!-- SEMESTER -->
+
+                        <td>
+
+                            {{ student.semester }}
+
+                        </td>
+
+
+
+                        <!-- ATTENDANCE -->
+
+                        <td>
+
+                            <div class="attendance">
+
+                                {% if student.average_attendance is not none %}
+
+                                    <span>
+                                        {{ "%.0f"|format(student.average_attendance) }}%
+                                    </span>
+
+                                    <div class="mini-progress">
+
+                                        <div style="width:{{ student.average_attendance }}%"></div>
+
+                                    </div>
+
+                                {% else %}
+
+                                    <span>N/A</span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+
+
+
+                        <!-- PERFORMANCE -->
+
+                        <td>
+
+                            {% if student.average_marks is not none %}
+
+                                {% if student.average_marks >= 75 %}
+
+                                    <strong class="performance-good">
+
+                                        {{ "%.0f"|format(student.average_marks) }}%
+
+                                    </strong>
+
+                                {% elif student.average_marks >= 50 %}
+
+                                    <strong class="performance-average">
+
+                                        {{ "%.0f"|format(student.average_marks) }}%
+
+                                    </strong>
+
+                                {% else %}
+
+                                    <strong class="performance-low">
+
+                                        {{ "%.0f"|format(student.average_marks) }}%
+
+                                    </strong>
+
+                                {% endif %}
+
+                            {% else %}
+
+                                N/A
+
+                            {% endif %}
+
+                        </td>
+
+
+
+                        <!-- RISK LEVEL -->
+
+                        <td>
+
+                            {% if student.average_marks is not none %}
+
+                                {% if student.average_marks >= 75 %}
+
+                                    <span class="risk-badge low">
+                                        Low Risk
+                                    </span>
+
+                                {% elif student.average_marks >= 50 %}
+
+                                    <span class="risk-badge medium">
+                                        Medium Risk
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="risk-badge high">
+                                        High Risk
+                                    </span>
+
+                                {% endif %}
+
+                            {% else %}
+
+                                <span class="risk-badge medium">
+                                    Not Evaluated
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+
+                        <!-- ACTION -->
+
+                        <td style="white-space: nowrap;">
+
+                            <a href="{{ url_for('teacher_prediction', student_id=student.id) }}"
+                               class="action-btn run-prediction-btn"
+                               title="Run ML Prediction"
+                               style="text-decoration: none; color: #5B3DF5; background: #ede9fe; display: inline-flex; align-items: center; justify-content: center;">
+
+                                <i class="bi bi-cpu-fill"></i>
+
+                            </a>
+
+                            <button type="button"
+                                    class="action-btn view-student-btn"
+                                    title="View Student"
+                                    data-id="{{ student.id }}"
+                                    data-name="{{ student.name }}"
+                                    data-email="{{ student.email }}"
+                                    data-phone="{{ student.phone or '' }}"
+                                    data-department="{{ student.department }}"
+                                    data-semester="{{ student.semester }}"
+                                    data-gender="{{ student.gender or 'Female' }}"
+                                    data-marks="{{ student.average_marks }}"
+                                    data-attendance="{{ student.average_attendance }}"
+                                    data-risk="{{ student.risk_level or ('Low Risk' if student.average_marks >= 75 else ('Medium Risk' if student.average_marks >= 50 else 'High Risk')) }}"
+                                    data-prediction="{{ student.predicted_score or '' }}"
+                                    onclick="openViewModal(this)">
+
+                                <i class="bi bi-eye"></i>
+
+                            </button>
+
+
+                            <button type="button"
+                                    class="action-btn edit-student-btn"
+                                    title="Edit Student"
+                                    data-id="{{ student.id }}"
+                                    data-name="{{ student.name }}"
+                                    data-email="{{ student.email }}"
+                                    data-phone="{{ student.phone or '' }}"
+                                    data-department="{{ student.department }}"
+                                    data-semester="{{ student.semester }}"
+                                    data-gender="{{ student.gender or 'Female' }}"
+                                    onclick="openEditModal(this)">
+
+                                <i class="bi bi-pencil"></i>
+
+                            </button>
+
+                            <button type="button"
+                                    class="action-btn delete-student-btn"
+                                    title="Delete Student"
+                                    data-id="{{ student.id }}"
+                                    data-name="{{ student.name }}"
+                                    style="color: #ef4444; background: #fef2f2; border-color: #fecaca;"
+                                    onclick="openDeleteModal(this)">
+
+                                <i class="bi bi-trash"></i>
+
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+                {% else %}
+
+                    <tr>
+
+                        <td colspan="8"
+                            style="text-align:center; padding:30px;">
+
+                            No students found.
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+
+        <!-- =================================================
+             TABLE FOOTER
+        ================================================== -->
+
+        <div class="table-footer">
+
+            <span>
+
+                Showing
+                <strong>{{ students|length }}</strong>
+                students
+
+            </span>
+
+
+            <div class="pagination">
+
+                <button class="page-btn disabled">
+
+                    <i class="bi bi-chevron-left"></i>
+
+                </button>
+
+                <button class="page-btn active">
+                    1
+                </button>
+
+                <button class="page-btn">
+                    2
+                </button>
+
+                <button class="page-btn">
+                    3
+                </button>
+
+                <span>...</span>
+
+                <button class="page-btn">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ADD STUDENT MODAL -->
+    <div class="modal-overlay" id="addStudentModal" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 16px; width: 100%; max-width: 480px; padding: 28px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); position: relative; font-family: 'Poppins', sans-serif;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; font-size: 20px; font-weight: 600; color: #1e293b;">Add New Student</h3>
+                <button type="button" onclick="document.getElementById('addStudentModal').style.display='none'" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b;">&times;</button>
+            </div>
+            <form method="POST" action="{{ url_for('teacher_add_student') }}">
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Student Name</label>
+                    <input type="text" name="name" required style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;" placeholder="e.g. John Doe">
+                </div>
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Email Address</label>
+                    <input type="email" name="email" required style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;" placeholder="john.doe@university.edu">
+                </div>
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Phone Number (For Mobile SMS OTP)</label>
+                    <input type="tel" name="phone" required style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;" placeholder="e.g. +91 98765 43210">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Department / Course</label>
+                        <input type="text" name="department" value="MSc IT" required style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Semester</label>
+                        <input type="number" name="semester" value="1" min="1" max="8" required style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Gender</label>
+                        <select name="gender" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                            <option value="Female">Female</option>
+                            <option value="Male">Male</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Initial Password</label>
+                        <input type="password" name="password" value="1234" required style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" onclick="document.getElementById('addStudentModal').style.display='none'" style="padding: 10px 18px; border-radius: 8px; border: 1px solid #cbd5e1; background: #f8fafc; font-weight: 500; cursor: pointer;">Cancel</button>
+                    <button type="submit" style="padding: 10px 20px; border-radius: 8px; border: none; background: #4f46e5; color: white; font-weight: 600; cursor: pointer;">Save Student</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         VIEW STUDENT MODAL
+    ====================================================== -->
+    <div class="modal-overlay" id="viewStudentModal" style="display:none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 20px;">
+        <div style="background: white; border-radius: 20px; width: 100%; max-width: 650px; max-height: 90vh; overflow-y: auto; padding: 28px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); position: relative; font-family: 'Poppins', sans-serif;">
+            
+            <!-- Modal Header -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 18px; border-bottom: 1px solid #f1f5f9; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <div id="viewStudentAvatar" style="width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);">
+                        ST
+                    </div>
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <h3 id="viewStudentName" style="margin: 0; font-size: 20px; font-weight: 700; color: #1e293b;">Student Name</h3>
+                            <span id="viewStudentIdBadge" style="background: #e0e7ff; color: #4338ca; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 12px;">STU001</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 4px; font-size: 13px; color: #64748b;">
+                            <span id="viewStudentDept"><i class="bi bi-mortarboard"></i> MSc IT</span>
+                            <span>•</span>
+                            <span id="viewStudentSem"><i class="bi bi-calendar3"></i> Semester 1</span>
+                            <span>•</span>
+                            <span id="viewStudentGender"><i class="bi bi-gender-ambiguous"></i> Female</span>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" onclick="document.getElementById('viewStudentModal').style.display='none'" style="background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; color: #64748b;">&times;</button>
+            </div>
+
+            <!-- Contact Information Bar -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: #f8fafc; padding: 14px 18px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #e2e8f0; font-size: 13px;">
+                <div style="display: flex; align-items: center; gap: 8px; color: #334155;">
+                    <i class="bi bi-envelope-at-fill" style="color: #6366f1;"></i>
+                    <span id="viewStudentEmail" style="word-break: break-all;">email@university.edu</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; color: #334155;">
+                    <i class="bi bi-telephone-fill" style="color: #10b981;"></i>
+                    <span id="viewStudentPhone">+91 98765 43210</span>
+                </div>
+            </div>
+
+            <!-- Metric Cards Grid -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px;">
+                <!-- Marks -->
+                <div style="background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 14px; padding: 14px; text-align: center;">
+                    <span style="font-size: 11px; font-weight: 600; color: #7c3aed; text-transform: uppercase; letter-spacing: 0.5px;">Avg Marks</span>
+                    <h4 id="viewStudentMarks" style="margin: 6px 0 2px; font-size: 22px; font-weight: 800; color: #5b21b6;">85%</h4>
+                    <span id="viewStudentMarksStatus" style="font-size: 11px; color: #6d28d9; font-weight: 500;">Good Standing</span>
+                </div>
+
+                <!-- Attendance -->
+                <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 14px; padding: 14px; text-align: center;">
+                    <span style="font-size: 11px; font-weight: 600; color: #059669; text-transform: uppercase; letter-spacing: 0.5px;">Attendance</span>
+                    <h4 id="viewStudentAtt" style="margin: 6px 0 2px; font-size: 22px; font-weight: 800; color: #065f46;">92%</h4>
+                    <span id="viewStudentAttStatus" style="font-size: 11px; color: #047857; font-weight: 500;">Regular</span>
+                </div>
+
+                <!-- Predicted Score & Risk -->
+                <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 14px; padding: 14px; text-align: center;">
+                    <span style="font-size: 11px; font-weight: 600; color: #2563eb; text-transform: uppercase; letter-spacing: 0.5px;">ML Forecast</span>
+                    <h4 id="viewStudentPred" style="margin: 6px 0 2px; font-size: 22px; font-weight: 800; color: #1e40af;">86%</h4>
+                    <span id="viewStudentRiskBadge" style="display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: #e0e7ff; color: #3730a3;">Low Risk</span>
+                </div>
+            </div>
+
+            <!-- Subject Performance Section -->
+            <div style="margin-bottom: 22px;">
+                <h4 style="margin: 0 0 10px; font-size: 14px; font-weight: 600; color: #334155; display: flex; align-items: center; gap: 6px;">
+                    <i class="bi bi-journal-text" style="color: #6366f1;"></i> Academic Subjects & Marks
+                </h4>
+                <div id="viewSubjectLoading" style="text-align: center; padding: 12px; color: #94a3b8; font-size: 13px;">
+                    <i class="bi bi-arrow-repeat" style="animation: spin 1s linear infinite; display: inline-block;"></i> Loading coursework...
+                </div>
+                <div id="viewSubjectContainer" style="display: none;">
+                    <div style="max-height: 150px; overflow-y: auto; border: 1px solid #f1f5f9; border-radius: 10px;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                            <thead>
+                                <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; text-align: left; color: #64748b;">
+                                    <th style="padding: 8px 12px; font-weight: 600;">Subject</th>
+                                    <th style="padding: 8px 12px; font-weight: 600; text-align: right;">Score</th>
+                                </tr>
+                            </thead>
+                            <tbody id="viewSubjectTbody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attendance Records Section -->
+            <div style="margin-bottom: 24px;">
+                <h4 style="margin: 0 0 10px; font-size: 14px; font-weight: 600; color: #334155; display: flex; align-items: center; gap: 6px;">
+                    <i class="bi bi-clock-history" style="color: #10b981;"></i> Attendance Records
+                </h4>
+                <div id="viewAttContainer">
+                    <div style="max-height: 140px; overflow-y: auto; border: 1px solid #f1f5f9; border-radius: 10px;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                            <thead>
+                                <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; text-align: left; color: #64748b;">
+                                    <th style="padding: 8px 12px; font-weight: 600;">Subject</th>
+                                    <th style="padding: 8px 12px; font-weight: 600; text-align: center;">Classes</th>
+                                    <th style="padding: 8px 12px; font-weight: 600; text-align: right;">Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody id="viewAttTbody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Action Footer -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 18px;">
+                <div style="display: flex; gap: 10px;">
+                    <a id="viewModalPredictBtn" href="#" class="primary-btn" style="text-decoration: none; padding: 10px 16px; border-radius: 8px; font-size: 13px;">
+                        <i class="bi bi-cpu-fill"></i> Run ML Prediction
+                    </a>
+                    <button type="button" id="viewModalEditBtn" style="padding: 10px 16px; border-radius: 8px; border: 1px solid #cbd5e1; background: #f8fafc; color: #334155; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="bi bi-pencil"></i> Edit Student
+                    </button>
+                </div>
+                <button type="button" onclick="document.getElementById('viewStudentModal').style.display='none'" style="padding: 10px 18px; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; color: #475569; font-weight: 500; font-size: 13px; cursor: pointer;">
+                    Close
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- =====================================================
+         EDIT STUDENT MODAL
+    ====================================================== -->
+    <div class="modal-overlay" id="editStudentModal" style="display:none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 20px;">
+        <div style="background: white; border-radius: 16px; width: 100%; max-width: 500px; padding: 28px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); position: relative; font-family: 'Poppins', sans-serif;">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9;">
+                <div>
+                    <h3 style="margin: 0; font-size: 20px; font-weight: 700; color: #1e293b;">Edit Student</h3>
+                    <span id="editStudentIdSub" style="font-size: 12px; color: #64748b;">Update student information</span>
+                </div>
+                <button type="button" onclick="document.getElementById('editStudentModal').style.display='none'" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b;">&times;</button>
+            </div>
+
+            <form id="editStudentForm" method="POST" action="">
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Full Name</label>
+                    <input type="text" name="name" id="editStudentName" required style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Email Address</label>
+                    <input type="email" name="email" id="editStudentEmail" required style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                </div>
+
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Phone Number (For Mobile SMS OTP)</label>
+                    <input type="tel" name="phone" id="editStudentPhone" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Department / Course</label>
+                        <input type="text" name="department" id="editStudentDepartment" required style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Semester</label>
+                        <input type="number" name="semester" id="editStudentSemester" min="1" max="8" required style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 22px;">
+                    <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Gender</label>
+                    <select name="gender" id="editStudentGender" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                        <option value="Female">Female</option>
+                        <option value="Male">Male</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 14px; border-top: 1px solid #f1f5f9;">
+                    <button type="button" onclick="document.getElementById('editStudentModal').style.display='none'" style="padding: 10px 18px; border-radius: 8px; border: 1px solid #cbd5e1; background: #f8fafc; font-weight: 500; cursor: pointer;">Cancel</button>
+                    <button type="submit" style="padding: 10px 22px; border-radius: 8px; border: none; background: #4f46e5; color: white; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- =====================================================
+         DELETE STUDENT MODAL
+    ====================================================== -->
+    <div class="modal-overlay" id="deleteStudentModal" style="display:none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 20px;">
+        <div style="background: white; border-radius: 16px; width: 100%; max-width: 440px; padding: 28px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); text-align: center; position: relative; font-family: 'Poppins', sans-serif;">
+            
+            <div style="width: 56px; height: 56px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 0 auto 16px;">
+                <i class="bi bi-trash3-fill"></i>
+            </div>
+
+            <h3 style="margin: 0 0 8px; font-size: 19px; font-weight: 700; color: #1e293b;">Delete Student</h3>
+            <p style="margin: 0 0 20px; font-size: 13px; color: #64748b; line-height: 1.5;">
+                Are you sure you want to permanently delete <strong id="deleteStudentNameText" style="color: #0f172a;"></strong>? This will remove all their academic scores, attendance records, and evaluations.
+            </p>
+
+            <form id="deleteStudentForm" method="POST" action="">
+                <div style="display: flex; justify-content: center; gap: 12px;">
+                    <button type="button" onclick="document.getElementById('deleteStudentModal').style.display='none'" style="padding: 10px 20px; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; color: #475569; font-weight: 500; font-size: 14px; cursor: pointer;">Cancel</button>
+                    <button type="submit" style="padding: 10px 22px; border-radius: 8px; border: none; background: #dc2626; color: white; font-weight: 600; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);">Yes, Delete Student</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</main>
+
+</div>
+
+<style>
+@keyframes spin { 100% { transform: rotate(360deg); } }
+</style>
+
+<!-- =====================================================
+     SEARCH, FILTER, PAGINATION & MODAL JAVASCRIPT
+====================================================== -->
+
+<script>
+const searchInput = document.getElementById("studentSearch");
+const topSearchInput = document.getElementById("topStudentSearch");
+const courseFilter = document.getElementById("courseFilter");
+const semesterFilter = document.getElementById("semesterFilter");
+const riskFilter = document.getElementById("riskFilter");
+const tableRows = document.querySelectorAll("#studentsTable tbody tr");
+
+// ================================
+// PAGINATION STATE
+// ================================
+let currentPage = 1;
+const rowsPerPage = 10;
+
+function updatePagination() {
+    const visibleRows = Array.from(tableRows).filter(r => !r.hasAttribute("data-hidden-by-filter") && !r.hasAttribute("data-empty-row"));
+    const totalVisible = visibleRows.length;
+    const totalPages = Math.max(1, Math.ceil(totalVisible / rowsPerPage));
+
+    if (currentPage > totalPages) currentPage = totalPages;
+
+    visibleRows.forEach((row, idx) => {
+        if (idx >= (currentPage - 1) * rowsPerPage && idx < currentPage * rowsPerPage) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+    });
+
+    const pagContainer = document.querySelector(".pagination");
+    if (pagContainer) {
+        pagContainer.innerHTML = "";
+
+        const prevBtn = document.createElement("button");
+        prevBtn.className = "page-btn" + (currentPage === 1 ? " disabled" : "");
+        prevBtn.innerHTML = '<i class="bi bi-chevron-left"></i>';
+        prevBtn.onclick = function() {
+            if (currentPage > 1) {
+                currentPage--;
+                updatePagination();
+            }
+        };
+        pagContainer.appendChild(prevBtn);
+
+        for (let p = 1; p <= totalPages; p++) {
+            const pBtn = document.createElement("button");
+            pBtn.className = "page-btn" + (p === currentPage ? " active" : "");
+            pBtn.innerText = p;
+            pBtn.onclick = (function(pageNum) {
+                return function() {
+                    currentPage = pageNum;
+                    updatePagination();
+                };
+            })(p);
+            pagContainer.appendChild(pBtn);
+        }
+
+        const nextBtn = document.createElement("button");
+        nextBtn.className = "page-btn" + (currentPage === totalPages ? " disabled" : "");
+        nextBtn.innerHTML = '<i class="bi bi-chevron-right"></i>';
+        nextBtn.onclick = function() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updatePagination();
+            }
+        };
+        pagContainer.appendChild(nextBtn);
+    }
+
+    const showingSpan = document.querySelector(".table-footer span");
+    if (showingSpan) {
+        const start = totalVisible === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1;
+        const end = Math.min(totalVisible, currentPage * rowsPerPage);
+        showingSpan.innerHTML = `Showing <strong>${start}-${end}</strong> of <strong>${totalVisible}</strong> students`;
+    }
+}
+
+// ================================
+// FILTERING
+// ================================
+function filterStudents() {
+    const searchValue = (searchInput && searchInput.value ? searchInput.value : (topSearchInput ? topSearchInput.value : "")).trim().toLowerCase();
+    const courseValue = courseFilter ? courseFilter.value.toLowerCase() : "";
+    const semesterValue = semesterFilter ? semesterFilter.value : "";
+    const riskValue = riskFilter ? riskFilter.value : "";
+
+    tableRows.forEach(row => {
+        if (row.cells.length < 8) {
+            row.setAttribute("data-empty-row", "true");
+            return;
+        }
+
+        const rowText = row.innerText.toLowerCase();
+        const course = row.cells[2]?.innerText.trim().toLowerCase() || "";
+        const semester = row.cells[3]?.innerText.trim() || "";
+
+        let risk = "";
+        if (rowText.includes("low risk")) {
+            risk = "low";
+        } else if (rowText.includes("medium risk")) {
+            risk = "medium";
+        } else if (rowText.includes("high risk")) {
+            risk = "high";
+        }
+
+        const matchesSearch = !searchValue || rowText.includes(searchValue);
+        const matchesCourse = !courseValue || course.includes(courseValue);
+        const matchesSemester = !semesterValue || semester === semesterValue;
+        const matchesRisk = !riskValue || risk === riskValue;
+
+        if (matchesSearch && matchesCourse && matchesSemester && matchesRisk) {
+            row.removeAttribute("data-hidden-by-filter");
+        } else {
+            row.setAttribute("data-hidden-by-filter", "true");
+            row.style.display = "none";
+        }
+    });
+
+    currentPage = 1;
+    updatePagination();
+}
+
+if (searchInput) {
+    searchInput.addEventListener("input", function() {
+        if (topSearchInput) topSearchInput.value = searchInput.value;
+        filterStudents();
+    });
+}
+
+if (topSearchInput) {
+    topSearchInput.addEventListener("input", function() {
+        if (searchInput) searchInput.value = topSearchInput.value;
+        filterStudents();
+    });
+}
+
+if (courseFilter) courseFilter.addEventListener("change", filterStudents);
+if (semesterFilter) semesterFilter.addEventListener("change", filterStudents);
+if (riskFilter) riskFilter.addEventListener("change", filterStudents);
+
+// ================================
+// VIEW MODAL
+// ================================
+function openViewModal(btn) {
+    const id = btn.getAttribute("data-id");
+    const name = btn.getAttribute("data-name");
+    const email = btn.getAttribute("data-email");
+    const phone = btn.getAttribute("data-phone") || "N/A";
+    const dept = btn.getAttribute("data-department");
+    const sem = btn.getAttribute("data-semester");
+    const gender = btn.getAttribute("data-gender") || "Female";
+    const marks = btn.getAttribute("data-marks") || "75.0";
+    const att = btn.getAttribute("data-attendance") || "85.0";
+    const risk = btn.getAttribute("data-risk") || "Low Risk";
+    const pred = btn.getAttribute("data-prediction") || Math.round(parseFloat(marks) * 0.9 + parseFloat(att) * 0.1);
+
+    // Populate header & basic info
+    document.getElementById("viewStudentName").innerText = name;
+    document.getElementById("viewStudentAvatar").innerText = name ? name.substring(0, 2).toUpperCase() : "ST";
+    document.getElementById("viewStudentIdBadge").innerText = "STU" + String(id).padStart(3, "0");
+    document.getElementById("viewStudentDept").innerHTML = '<i class="bi bi-mortarboard"></i> ' + dept;
+    document.getElementById("viewStudentSem").innerHTML = '<i class="bi bi-calendar3"></i> Semester ' + sem;
+    document.getElementById("viewStudentGender").innerHTML = '<i class="bi bi-gender-ambiguous"></i> ' + gender;
+    document.getElementById("viewStudentEmail").innerText = email;
+    document.getElementById("viewStudentPhone").innerText = phone || "N/A";
+
+    // Metrics
+    document.getElementById("viewStudentMarks").innerText = Math.round(parseFloat(marks)) + "%";
+    document.getElementById("viewStudentMarksStatus").innerText = parseFloat(marks) >= 75 ? "Good Standing" : (parseFloat(marks) >= 50 ? "Average" : "Needs Attention");
+    document.getElementById("viewStudentAtt").innerText = Math.round(parseFloat(att)) + "%";
+    document.getElementById("viewStudentAttStatus").innerText = parseFloat(att) >= 85 ? "Regular" : "Attendance Low";
+    document.getElementById("viewStudentPred").innerText = Math.round(parseFloat(pred)) + "%";
+
+    const riskBadge = document.getElementById("viewStudentRiskBadge");
+    riskBadge.innerText = risk;
+    if (risk.toLowerCase().includes("high")) {
+        riskBadge.style.background = "#fee2e2";
+        riskBadge.style.color = "#b91c1c";
+    } else if (risk.toLowerCase().includes("med") || risk.toLowerCase().includes("mod")) {
+        riskBadge.style.background = "#fef3c7";
+        riskBadge.style.color = "#b45309";
+    } else {
+        riskBadge.style.background = "#dcfce7";
+        riskBadge.style.color = "#15803d";
+    }
+
+    // Modal buttons
+    document.getElementById("viewModalPredictBtn").href = "/teacher/prediction?student_id=" + id;
+    document.getElementById("viewModalEditBtn").onclick = function() {
+        openEditModal(btn);
+    };
+
+    // Show modal
+    document.getElementById("viewStudentModal").style.display = "flex";
+
+    // Fetch details
+    document.getElementById("viewSubjectLoading").style.display = "block";
+    document.getElementById("viewSubjectContainer").style.display = "none";
+
+    fetch('/api/teacher/student/' + id)
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("viewSubjectLoading").style.display = "none";
+            document.getElementById("viewSubjectContainer").style.display = "block";
+
+            const sTbody = document.getElementById("viewSubjectTbody");
+            sTbody.innerHTML = "";
+            if (data.academic_records && data.academic_records.length > 0) {
+                data.academic_records.forEach(r => {
+                    const tr = document.createElement("tr");
+                    tr.style.borderBottom = "1px solid #f1f5f9";
+                    tr.innerHTML = `
+                        <td style="padding: 8px 12px; font-weight: 500; color: #1e293b;">${r.subject}</td>
+                        <td style="padding: 8px 12px; text-align: right; font-weight: 700; color: ${r.marks >= 75 ? '#16a34a' : (r.marks >= 50 ? '#d97706' : '#dc2626')};">${Math.round(r.marks)}%</td>
+                    `;
+                    sTbody.appendChild(tr);
+                });
+            } else {
+                sTbody.innerHTML = '<tr><td colspan="2" style="padding: 10px; text-align:center; color:#94a3b8;">No course marks recorded yet.</td></tr>';
+            }
+
+            const aTbody = document.getElementById("viewAttTbody");
+            aTbody.innerHTML = "";
+            if (data.attendance_records && data.attendance_records.length > 0) {
+                data.attendance_records.forEach(r => {
+                    const tr = document.createElement("tr");
+                    tr.style.borderBottom = "1px solid #f1f5f9";
+                    tr.innerHTML = `
+                        <td style="padding: 8px 12px; font-weight: 500; color: #1e293b;">${r.subject || 'Overall'}</td>
+                        <td style="padding: 8px 12px; text-align: center; color: #64748b;">${r.attended_classes || 0} / ${r.total_classes || 0}</td>
+                        <td style="padding: 8px 12px; text-align: right; font-weight: 700; color: ${r.percentage >= 85 ? '#16a34a' : (r.percentage >= 75 ? '#d97706' : '#dc2626')};">${Math.round(r.percentage || 0)}%</td>
+                    `;
+                    aTbody.appendChild(tr);
+                });
+            } else {
+                aTbody.innerHTML = '<tr><td colspan="3" style="padding: 10px; text-align:center; color:#94a3b8;">No attendance records recorded yet.</td></tr>';
+            }
+        })
+        .catch(err => {
+            document.getElementById("viewSubjectLoading").style.display = "none";
+            document.getElementById("viewSubjectContainer").style.display = "block";
+        });
+}
+
+// ================================
+// EDIT MODAL
+// ================================
+function openEditModal(btn) {
+    const id = btn.getAttribute("data-id");
+    const name = btn.getAttribute("data-name");
+    const email = btn.getAttribute("data-email");
+    const phone = btn.getAttribute("data-phone") || "";
+    const dept = btn.getAttribute("data-department") || "MSc IT";
+    const sem = btn.getAttribute("data-semester") || "1";
+    const gender = btn.getAttribute("data-gender") || "Female";
+
+    document.getElementById("editStudentIdSub").innerText = "STU" + String(id).padStart(3, "0");
+    document.getElementById("editStudentName").value = name;
+    document.getElementById("editStudentEmail").value = email;
+    document.getElementById("editStudentPhone").value = phone;
+    document.getElementById("editStudentDepartment").value = dept;
+    document.getElementById("editStudentSemester").value = sem;
+    document.getElementById("editStudentGender").value = gender;
+
+    document.getElementById("editStudentForm").action = "/teacher/students/edit/" + id;
+
+    // Hide view modal if open
+    document.getElementById("viewStudentModal").style.display = "none";
+    document.getElementById("editStudentModal").style.display = "flex";
+}
+
+// ================================
+// DELETE MODAL
+// ================================
+function openDeleteModal(btn) {
+    const id = btn.getAttribute("data-id");
+    const name = btn.getAttribute("data-name");
+
+    document.getElementById("deleteStudentNameText").innerText = name + " (STU" + String(id).padStart(3, "0") + ")";
+    document.getElementById("deleteStudentForm").action = "/teacher/students/delete/" + id;
+
+    document.getElementById("deleteStudentModal").style.display = "flex";
+}
+
+// ================================
+// CLOSE MODALS ON BACKDROP OR ESC
+// ================================
+window.addEventListener("click", function(e) {
+    const modals = ["viewStudentModal", "editStudentModal", "deleteStudentModal", "addStudentModal"];
+    modals.forEach(mId => {
+        const m = document.getElementById(mId);
+        if (m && e.target === m) {
+            m.style.display = "none";
+        }
+    });
+});
+
+window.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") {
+        const modals = ["viewStudentModal", "editStudentModal", "deleteStudentModal", "addStudentModal"];
+        modals.forEach(mId => {
+            const m = document.getElementById(mId);
+            if (m) m.style.display = "none";
+        });
+    }
+});
+
+// Support query parameter (e.g. ?view=22 or ?edit=22 or ?search=...)
+window.addEventListener("DOMContentLoaded", function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const q = urlParams.get("search") || urlParams.get("q");
+    if (q) {
+        if (searchInput) searchInput.value = q;
+        if (topSearchInput) topSearchInput.value = q;
+    }
+    filterStudents();
+
+    const viewId = urlParams.get("view");
+    if (viewId) {
+        const btn = document.querySelector(`.view-student-btn[data-id="${viewId}"]`);
+        if (btn) openViewModal(btn);
+    }
+
+    const editId = urlParams.get("edit");
+    if (editId) {
+        const btn = document.querySelector(`.edit-student-btn[data-id="${editId}"]`);
+        if (btn) openEditModal(btn);
+    }
+});
+</script>
+
+</body>
+</html>

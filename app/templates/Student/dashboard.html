@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudentIQ Dashboard</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Student_CSS/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Student_CSS/notifications.css') }}">
+    <style>
+        .metric-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        .badge-low { background: #dcfce7; color: #15803d; }
+        .badge-medium { background: #fef9c3; color: #a16207; }
+        .badge-high { background: #fee2e2; color: #b91c1c; }
+        .pred-param-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 14px;
+            transition: all 0.2s ease;
+        }
+        .pred-param-card:hover {
+            background: #f1f5f9;
+            transform: translateY(-2px);
+        }
+        .prediction-module-card {
+            margin-top: 30px;
+            background: #fff;
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="dashboard">
+
+    <!-- ================= SIDEBAR ================= -->
+    {% include 'Student/sidebar.html' %}
+
+    <!-- ================= MAIN CONTENT ================= -->
+
+    <main class="main-content">
+
+        <!-- ================= HEADER ================= -->
+
+        <header class="topbar">
+
+            <div>
+
+                <h1>Student Performance Dashboard</h1>
+
+                <p>Machine Learning Based Predictive Analytics</p>
+
+            </div>
+
+            <div class="top-right">
+                {% include 'Student/notifications_widget.html' %}
+
+                <!-- Profile -->
+                <div class="student-profile" style="display: flex; align-items: center; gap: 10px; margin-left: 8px;">
+                    <div class="profile-avatar" style="overflow: hidden; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #6c63ff, #5b3df5); color: white;">
+                        {% if current_avatar %}
+                            <img src="{{ current_avatar }}" alt="{{ student.name if student else 'Student' }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% elif student and student.profile_pic %}
+                            <img src="{{ url_for('static', filename=student.profile_pic) }}" alt="{{ student.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            <i class="bi bi-person-fill" style="font-size: 20px;"></i>
+                        {% endif %}
+                    </div>
+                    <div class="profile-info" style="display: flex; flex-direction: column;">
+                        <strong style="font-size: 13px; color: #1e293b;">{{ student.name if student else (current_name or "Student") }}</strong>
+                        <span style="font-size: 11px; color: #64748b;">Student</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </header>
+
+        <!-- FLASH MESSAGES -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div style="padding: 0 40px; margin-top: 20px;">
+                    {% for category, message in messages %}
+                        <div style="padding: 14px 20px; border-radius: 12px; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; background: {% if category == 'success' %}#ecfdf5; color: #065f46; border: 1px solid #a7f3d0{% elif category == 'danger' %}#fef2f2; color: #991b1b; border: 1px solid #fecaca{% elif category == 'warning' %}#fffbeb; color: #92400e; border: 1px solid #fde68a{% else %}#eff6ff; color: #1e40af; border: 1px solid #bfdbfe{% endif %};">
+                            <i class="bi bi-info-circle-fill"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- ================= HERO ================= -->
+
+        <section class="hero">
+
+            <div class="hero-left">
+
+                <span class="badge">
+                    AI Powered Dashboard
+                </span>
+
+                <h2>
+                    Welcome Back, {{ student.name }} 👋
+                </h2>
+
+               <p>
+    Monitor your academic performance, attendance
+    and predicted outcomes using StudentIQ.
+</p>
+
+<div class="student-info">
+    <span>
+        <i class="bi bi-building"></i>
+        {{ student.department }}
+    </span>
+
+    <span>
+        <i class="bi bi-book"></i>
+        Semester {{ student.semester }}
+    </span>
+</div>
+
+                <div class="hero-buttons">
+                    <button class="btn-primary" onclick="window.location.href='/dashboard'">
+                        Dashboard
+                    </button>
+
+                    <button class="btn-secondary" onclick="window.location.href='/analytics'">
+                        Analytics
+                    </button>
+                </div>
+
+            </div>
+
+            <div class="hero-right">
+
+                <div class="hero-circle">
+
+                    <i class="bi bi-mortarboard-fill"></i>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ================= KPI ================= -->
+
+        <section class="kpi-grid">
+
+            <div class="kpi-card">
+
+                <div class="kpi-top">
+
+                    <div>
+
+                        <h5>Total Students</h5>
+
+                        <h2>{{ total_students }}</h2>
+
+                    </div>
+
+                    <div class="kpi-icon purple">
+
+                        <i class="bi bi-people-fill"></i>
+
+                    </div>
+
+                </div>
+
+                <span>+12% this semester</span>
+
+            </div>
+
+            <div class="kpi-card">
+
+                <div class="kpi-top">
+
+                    <div>
+
+                        <h5>Average Marks</h5>
+
+                        <h2>{{ average_marks }}%</h2>
+
+                    </div>
+
+                    <div class="kpi-icon blue">
+
+                        <i class="bi bi-bar-chart-fill"></i>
+
+                    </div>
+
+                </div>
+
+                <span>{% if average_marks >= 75 %}Excellent Performance{% elif average_marks >= 50 %}Good Standing{% else %}Needs Focus{% endif %}</span>
+
+            </div>
+
+            <div class="kpi-card" onclick="window.location.href='/attendance'" style="cursor: pointer;" title="View Subject Attendance Breakdown">
+
+                <div class="kpi-top">
+
+                    <div>
+
+                        <h5>Attendance</h5>
+
+                        <h2>{{ average_attendance }}%</h2>
+
+                    </div>
+
+                    <div class="kpi-icon green">
+
+                        <i class="bi bi-calendar-check-fill"></i>
+
+                    </div>
+
+                </div>
+
+                <span>{% if average_attendance >= 85 %}Above Average{% else %}Needs Improvement{% endif %}</span>
+
+            </div>
+
+            <div class="kpi-card" onclick="document.getElementById('predictionModuleSection').scrollIntoView({behavior: 'smooth'})" style="cursor: pointer;" title="View Performance Forecast">
+
+                <div class="kpi-top">
+
+                    <div>
+
+                        <h5>Predicted Score</h5>
+
+                        <h2>{{ predicted_score }}%</h2>
+
+                    </div>
+
+                    <div class="kpi-icon orange">
+
+                        <i class="bi bi-stars"></i>
+
+                    </div>
+
+                </div>
+
+                <div style="display: flex; gap: 6px; align-items: center; margin-top: 4px; flex-wrap: wrap;">
+                    <span style="font-weight: 600;">{{ performance_level or 'ML Forecast' }}</span>
+                    <span style="font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 10px; background: rgba(255,255,255,0.25); color: #fff;">{{ pred_details.threshold }}</span>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- NEXT: Analytics Section (Part 2) -->
+         <!-- ================= CHARTS ================= -->
+
+<section class="charts-grid">
+
+    <div class="chart-card">
+
+        <div class="card-header">
+
+            <h3>Subject Analysis</h3>
+
+            <span>Average Marks</span>
+
+        </div>
+
+        <canvas id="subjectChart"></canvas>
+
+    </div>
+
+    <div class="chart-card">
+
+        <div class="card-header">
+
+            <h3>Attendance Trend</h3>
+
+            <span>Weekly</span>
+
+        </div>
+
+        <canvas id="attendanceChart"></canvas>
+
+    </div>
+
+</section>
+
+<!-- ================= PREDICTION MODULE (FORECAST INTELLIGENCE) ================= -->
+<section id="predictionModuleSection" class="prediction-module-card">
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="background: #ede9fe; color: #5B3DF5; width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px;">
+                <i class="bi bi-stars"></i>
+            </div>
+            <div>
+                <h3 style="margin: 0; font-size: 20px; font-weight: 700; color: #1e293b;">Forecast Intelligence & Predictive Analytics</h3>
+                <p style="margin: 2px 0 0; font-size: 13px; color: #64748b;">Machine Learning Performance Forecast (Evaluated by Faculty)</p>
+            </div>
+        </div>
+        <span style="font-size: 12px; color: #64748b; background: #f8fafc; border: 1px solid #e2e8f0; padding: 6px 12px; border-radius: 20px; font-weight: 500;">
+            <i class="bi bi-shield-check text-success"></i> {% if prediction %}Faculty Evaluated: {{ prediction.prediction_date }}{% else %}Active Baseline ML Forecast{% endif %}
+        </span>
+    </div>
+
+    <!-- PREDICTION RESULT DISPLAY -->
+    <div style="background: #f8fafc; border-radius: 16px; padding: 26px; text-align: center; margin-bottom: 24px; border: 1px solid #e2e8f0;">
+        <span style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">
+            Predicted Performance / Predicted Exam Score
+        </span>
+        <div style="margin: 12px 0;">
+            <span id="studentPredictedScore" style="font-size: 54px; font-weight: 800; color: #4338ca; line-height: 1;">{{ predicted_score }}</span>
+            <span style="font-size: 28px; font-weight: 700; color: #6366f1;">%</span>
+        </div>
+        <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+            <span class="metric-badge {% if 'Excellent' in performance_level or 'Good' in performance_level %}badge-low{% elif 'Average' in performance_level %}badge-medium{% else %}badge-high{% endif %}" style="font-size: 12px;">
+                {{ performance_level }}
+            </span>
+            <span class="metric-badge" style="{% if pred_details.meets_85_threshold %}background: #dcfce7; color: #15803d; border: 1px solid #86efac;{% else %}background: #e2e8f0; color: #475569;{% endif %} font-size: 12px;">
+                <i class="bi bi-award-fill"></i> {{ pred_details.threshold }}
+            </span>
+            <span class="metric-badge {% if 'High' in risk_level %}badge-high{% elif 'Mod' in risk_level or 'Medium' in risk_level %}badge-medium{% else %}badge-low{% endif %}" style="font-size: 12px;">
+                <i class="bi bi-shield-check"></i> {{ risk_level }}
+            </span>
+        </div>
+        <p style="margin: 12px auto 0; font-size: 13px; color: #475569; line-height: 1.5; max-width: 650px;">
+            {{ pred_details.description }}
+        </p>
+    </div>
+
+    <!-- PARAMETER ANALYSIS SECTION -->
+    <div style="margin-bottom: 24px;">
+        <h4 style="margin: 0 0 14px 0; font-size: 14px; font-weight: 700; color: #1e293b;">
+            <i class="bi bi-bar-chart-steps" style="color: #5B3DF5;"></i> Parameter Analysis:
+        </h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">
+            <!-- Attendance -->
+            <div class="pred-param-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 600; font-size: 13px; color: #1e293b;"><i class="bi bi-calendar-check" style="color: #3b82f6;"></i> Attendance:</span>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <strong style="color: #4338ca; font-size: 13px;">{{ pred_details.parameter_analysis.attendance.display_value }}</strong>
+                        <span class="metric-badge {% if pred_details.parameter_analysis.attendance.status == 'Good' or pred_details.parameter_analysis.attendance.status == 'Excellent' %}badge-low{% elif 'Moderate' in pred_details.parameter_analysis.attendance.status %}badge-medium{% else %}badge-high{% endif %}" style="padding: 2px 8px; font-size: 11px;">{{ pred_details.parameter_analysis.attendance.status }}</span>
+                    </div>
+                </div>
+                <p style="margin: 6px 0 0 0; font-size: 11.5px; color: #64748b; line-height: 1.35;">{{ pred_details.parameter_analysis.attendance.message }}</p>
+            </div>
+
+            <!-- Study Hours -->
+            <div class="pred-param-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 600; font-size: 13px; color: #1e293b;"><i class="bi bi-book" style="color: #10b981;"></i> Study Hours:</span>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <strong style="color: #4338ca; font-size: 13px;">{{ pred_details.parameter_analysis.study_hours.display_value }}</strong>
+                        <span class="metric-badge {% if 'Good' in pred_details.parameter_analysis.study_hours.status or 'Optimal' in pred_details.parameter_analysis.study_hours.status %}badge-low{% elif 'Moderate' in pred_details.parameter_analysis.study_hours.status %}badge-medium{% else %}badge-high{% endif %}" style="padding: 2px 8px; font-size: 11px;">{{ pred_details.parameter_analysis.study_hours.status }}</span>
+                    </div>
+                </div>
+                <p style="margin: 6px 0 0 0; font-size: 11.5px; color: #64748b; line-height: 1.35;">{{ pred_details.parameter_analysis.study_hours.message }}</p>
+            </div>
+
+            <!-- Previous Marks -->
+            <div class="pred-param-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 600; font-size: 13px; color: #1e293b;"><i class="bi bi-file-earmark-bar-graph" style="color: #06b6d4;"></i> Previous Marks:</span>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <strong style="color: #4338ca; font-size: 13px;">{{ pred_details.parameter_analysis.previous_marks.display_value }}</strong>
+                        <span class="metric-badge {% if 'Good' in pred_details.parameter_analysis.previous_marks.status or 'Excellent' in pred_details.parameter_analysis.previous_marks.status %}badge-low{% elif 'Moderate' in pred_details.parameter_analysis.previous_marks.status %}badge-medium{% else %}badge-high{% endif %}" style="padding: 2px 8px; font-size: 11px;">{{ pred_details.parameter_analysis.previous_marks.status }}</span>
+                    </div>
+                </div>
+                <p style="margin: 6px 0 0 0; font-size: 11.5px; color: #64748b; line-height: 1.35;">{{ pred_details.parameter_analysis.previous_marks.message }}</p>
+            </div>
+
+            <!-- Sleep Duration -->
+            <div class="pred-param-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 600; font-size: 13px; color: #1e293b;"><i class="bi bi-moon-stars" style="color: #6366f1;"></i> Sleep Duration:</span>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <strong style="color: #4338ca; font-size: 13px;">{{ pred_details.parameter_analysis.sleep_duration.display_value }}</strong>
+                        <span class="metric-badge {% if 'Optimal' in pred_details.parameter_analysis.sleep_duration.status or 'Good' in pred_details.parameter_analysis.sleep_duration.status %}badge-low{% else %}badge-medium{% endif %}" style="padding: 2px 8px; font-size: 11px;">{{ pred_details.parameter_analysis.sleep_duration.status }}</span>
+                    </div>
+                </div>
+                <p style="margin: 6px 0 0 0; font-size: 11.5px; color: #64748b; line-height: 1.35;">{{ pred_details.parameter_analysis.sleep_duration.message }}</p>
+            </div>
+
+            <!-- Social Media -->
+            <div class="pred-param-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 600; font-size: 13px; color: #1e293b;"><i class="bi bi-phone" style="color: #f59e0b;"></i> Social Media:</span>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <strong style="color: #4338ca; font-size: 13px;">{{ pred_details.parameter_analysis.social_media.display_value }}</strong>
+                        <span class="metric-badge {% if pred_details.parameter_analysis.social_media.status == 'Low' or pred_details.parameter_analysis.social_media.status == 'Good' %}badge-low{% elif pred_details.parameter_analysis.social_media.status == 'Moderate' %}badge-medium{% else %}badge-high{% endif %}" style="padding: 2px 8px; font-size: 11px;">{{ pred_details.parameter_analysis.social_media.status }}</span>
+                    </div>
+                </div>
+                <p style="margin: 6px 0 0 0; font-size: 11.5px; color: #64748b; line-height: 1.35;">{{ pred_details.parameter_analysis.social_media.message }}</p>
+            </div>
+
+            <!-- Motivation Level -->
+            <div class="pred-param-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 600; font-size: 13px; color: #1e293b;"><i class="bi bi-fire" style="color: #ea580c;"></i> Motivation Level:</span>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <strong style="color: #4338ca; font-size: 13px;">{{ pred_details.parameter_analysis.motivation_level.display_value }}</strong>
+                        <span class="metric-badge {% if 'High' in pred_details.parameter_analysis.motivation_level.status %}badge-low{% elif 'Mod' in pred_details.parameter_analysis.motivation_level.status %}badge-medium{% else %}badge-high{% endif %}" style="padding: 2px 8px; font-size: 11px;">{{ pred_details.parameter_analysis.motivation_level.status }}</span>
+                    </div>
+                </div>
+                <p style="margin: 6px 0 0 0; font-size: 11.5px; color: #64748b; line-height: 1.35;">{{ pred_details.parameter_analysis.motivation_level.message }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- BENCHMARKS & FEATURE IMPORTANCE GRID -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 24px;">
+
+        <!-- INDICATORS ASSOCIATED WITH STRONG PERFORMANCE -->
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 16px;">
+            <h4 style="margin: 0 0 8px 0; font-size: 13px; font-weight: 700; color: #166534;">
+                <i class="bi bi-shield-star-fill"></i> Indicators Associated With Strong Performance:
+            </h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11.5px; margin: 10px 0;">
+                <div><strong style="color: #14532d;">Attendance:</strong> 85–90%+</div>
+                <div><strong style="color: #14532d;">Study Hours:</strong> 16+ hrs/week</div>
+                <div><strong style="color: #14532d;">Previous Marks:</strong> 85%+</div>
+                <div><strong style="color: #14532d;">Sleep:</strong> 7–9 hrs/day</div>
+                <div><strong style="color: #14532d;">Social Media:</strong> &le; 2 hrs/day</div>
+                <div><strong style="color: #14532d;">Motivation:</strong> High</div>
+            </div>
+            <p style="margin: 8px 0 0 0; font-size: 11px; color: #15803d; line-height: 1.4; font-style: italic;">
+                These conditions represent a stronger academic profile. The final prediction is generated by the trained Random Forest model.
+            </p>
+        </div>
+
+        <!-- MODEL FEATURE IMPORTANCE -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <h4 style="margin: 0; font-size: 13px; font-weight: 700; color: #1e293b;">
+                    <i class="bi bi-diagram-3-fill" style="color: #6366f1;"></i> Model Feature Importance:
+                </h4>
+                <span style="font-size: 11px; color: #64748b;">Trained Random Forest</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 11px;">
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 6px 10px; border-radius: 6px; display: flex; justify-content: space-between;">
+                    <span>Attendance:</span> <strong>42.2%</strong>
+                </div>
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 6px 10px; border-radius: 6px; display: flex; justify-content: space-between;">
+                    <span>Social Media:</span> <strong>13.9%</strong>
+                </div>
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 6px 10px; border-radius: 6px; display: flex; justify-content: space-between;">
+                    <span>Study Hours:</span> <strong>13.7%</strong>
+                </div>
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 6px 10px; border-radius: 6px; display: flex; justify-content: space-between;">
+                    <span>Previous Scores:</span> <strong>7.9%</strong>
+                </div>
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 6px 10px; border-radius: 6px; display: flex; justify-content: space-between;">
+                    <span>Tutoring Sessions:</span> <strong>3.2%</strong>
+                </div>
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 6px 10px; border-radius: 6px; display: flex; justify-content: space-between;">
+                    <span>Resources Access:</span> <strong>2.9%</strong>
+                </div>
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 6px 10px; border-radius: 6px; display: flex; justify-content: space-between;">
+                    <span>Parental Involvement:</span> <strong>2.6%</strong>
+                </div>
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 6px 10px; border-radius: 6px; display: flex; justify-content: space-between;">
+                    <span>Sleep Hours:</span> <strong>2.1%</strong>
+                </div>
+            </div>
+            <p style="margin: 8px 0 0 0; font-size: 11px; color: #64748b; line-height: 1.4;">
+                Feature importance describes how the trained model uses features across its decision trees. It reflects model reliance rather than individual causal proof.
+            </p>
+        </div>
+
+    </div>
+
+    <!-- RECOMMENDATION BOX -->
+    <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 16px; display: flex; align-items: flex-start; gap: 12px;">
+        <i class="bi bi-lightbulb-fill" style="color: #d97706; font-size: 20px; margin-top: 2px;"></i>
+        <div>
+            <h5 style="margin: 0 0 4px; font-size: 13px; font-weight: 700; color: #92400e;">Faculty & ML Guidance</h5>
+            <p style="margin: 0; font-size: 12.5px; color: #b45309; line-height: 1.45;">
+                {{ pred_details.recommendation }}
+            </p>
+        </div>
+    </div>
+
+</section>
+
+</main>
+
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Dashboard JavaScript -->
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+<script>
+    // Synchronize Student Dashboard Charts with Student's Actual Database Records
+    document.addEventListener("DOMContentLoaded", function() {
+        const studentAcademicRecords = [
+            {% for r in academic_records %}
+            { subject: {{ r.subject|tojson }}, marks: {{ r.marks }} }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ];
+        const studentAttendanceRecords = [
+            {% for r in attendance_records %}
+            { subject: {{ r.subject|tojson }}, percentage: {{ r.percentage }} }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        // 1. Update Subject Analysis Bar Chart
+        if (studentAcademicRecords.length > 0 && typeof Chart !== 'undefined') {
+            const sCanvas = document.getElementById("subjectChart");
+            if (sCanvas) {
+                const existingSubjectChart = Chart.getChart(sCanvas);
+                if (existingSubjectChart) {
+                    existingSubjectChart.destroy();
+                }
+                new Chart(sCanvas, {
+                    type: "bar",
+                    data: {
+                        labels: studentAcademicRecords.map(r => r.subject),
+                        datasets: [{
+                            label: "Subject Score (%)",
+                            data: studentAcademicRecords.map(r => r.marks),
+                            backgroundColor: ["#6C63FF", "#8B5CF6", "#A78BFA", "#C4B5FD", "#DDD6FE"],
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, max: 100 }
+                        },
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+        }
+
+        // 2. Update Attendance Trend Chart
+        if (studentAttendanceRecords.length > 0 && typeof Chart !== 'undefined') {
+            const aCanvas = document.getElementById("attendanceChart");
+            if (aCanvas) {
+                const existingAttChart = Chart.getChart(aCanvas);
+                if (existingAttChart) {
+                    existingAttChart.destroy();
+                }
+                new Chart(aCanvas, {
+                    type: "line",
+                    data: {
+                        labels: studentAttendanceRecords.map(r => r.subject),
+                        datasets: [{
+                            label: "Attendance Rate (%)",
+                            data: studentAttendanceRecords.map(r => r.percentage),
+                            borderColor: "#10B981",
+                            backgroundColor: "rgba(16, 185, 129, 0.15)",
+                            fill: true,
+                            tension: 0.35,
+                            pointRadius: 5,
+                            pointBackgroundColor: "#10B981"
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, max: 100 }
+                        },
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+        }
+    });
+</script>
+
+</body>
+
+</html>

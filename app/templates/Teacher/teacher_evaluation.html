@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Student Evaluation | Teacher | StudentIQ</title>
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Teacher Sidebar CSS -->
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/Teacher_CSS/teacher_sidebar.css') }}">
+
+    <!-- Evaluation CSS -->
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/Teacher_CSS/teacher_evaluation.css') }}">
+
+</head>
+
+
+<body>
+
+<div class="teacher-layout">
+
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    {% include 'Teacher/teacher_sidebar.html' %}
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
+
+    <main class="teacher-main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div style="padding: 14px 20px; margin: 15px 30px; border-radius: 12px; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; background: {% if category == 'success' %}#ecfdf5; color: #065f46; border: 1px solid #a7f3d0{% elif category == 'danger' %}#fef2f2; color: #991b1b; border: 1px solid #fecaca{% else %}#fffbeb; color: #92400e; border: 1px solid #fde68a{% endif %};">
+                    <i class="bi bi-info-circle-fill"></i>
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+
+        <!-- =================================================
+             TOP BAR
+        ================================================== -->
+
+        <header class="topbar">
+
+            <div class="search-box">
+
+                <i class="bi bi-search"></i>
+
+                <input type="text"
+                       id="evaluationSearchInput"
+                       placeholder="Search students...">
+
+            </div>
+
+
+            <div class="topbar-right">
+
+                <div class="teacher-profile">
+
+                    <div class="teacher-avatar" style="overflow: hidden; border-radius: 50%;">
+                        {% if current_avatar %}
+                            <img src="{{ current_avatar }}" alt="Faculty" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% elif teacher and teacher.profile_pic %}
+                            <img src="{{ url_for('static', filename=teacher.profile_pic) }}" alt="Faculty" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            <i class="bi bi-person"></i>
+                        {% endif %}
+                    </div>
+
+                    <div class="teacher-info">
+
+                        <strong>{{ teacher.name if teacher else "Teacher" }}</strong>
+
+                        <span>Teacher</span>
+
+                    </div>
+
+                    <i class="bi bi-chevron-down profile-arrow"></i>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- =================================================
+             PAGE HEADING
+        ================================================== -->
+
+        <section class="page-heading">
+
+            <div>
+
+                <h1>Student Evaluation</h1>
+
+                <p>
+                    Evaluate student performance, activity,
+                    knowledge and overall development.
+                </p>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             EVALUATION OVERVIEW
+        ================================================== -->
+
+        <section class="evaluation-stats">
+
+
+            <div class="evaluation-stat-card">
+
+                <div class="stat-icon purple">
+
+                    <i class="bi bi-clipboard2-check-fill"></i>
+
+                </div>
+
+                <div>
+
+                    <span>Total Evaluations</span>
+
+                    <strong>32</strong>
+
+                    <small>This semester</small>
+
+                </div>
+
+            </div>
+
+
+            <div class="evaluation-stat-card">
+
+                <div class="stat-icon green">
+
+                    <i class="bi bi-check-circle-fill"></i>
+
+                </div>
+
+                <div>
+
+                    <span>Completed</span>
+
+                    <strong>24</strong>
+
+                    <small>75% completed</small>
+
+                </div>
+
+            </div>
+
+
+            <div class="evaluation-stat-card">
+
+                <div class="stat-icon yellow">
+
+                    <i class="bi bi-hourglass-split"></i>
+
+                </div>
+
+                <div>
+
+                    <span>Pending</span>
+
+                    <strong>8</strong>
+
+                    <small>Need attention</small>
+
+                </div>
+
+            </div>
+
+
+            <div class="evaluation-stat-card">
+
+                <div class="stat-icon blue">
+
+                    <i class="bi bi-people-fill"></i>
+
+                </div>
+
+                <div>
+
+                    <span>Students</span>
+
+                    <strong>{{ students|length }}</strong>
+
+                    <small>Across all classes</small>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             SELECT STUDENT
+        ================================================== -->
+
+        <section class="evaluation-card">
+
+
+            <div class="card-heading">
+
+                <div>
+
+                    <h3>Evaluate a Student</h3>
+
+                    <p>
+                        Select a student to create or update
+                        their evaluation.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="evaluation-select-row">
+
+
+                <div class="select-group">
+
+                    <label>
+                        Select Class
+                    </label>
+
+                    <select id="classSelect">
+
+                        <option value="">
+                            Select Class
+                        </option>
+
+                        {% for student in students %}
+
+                        <option value="{{ student.semester }}">
+                            Semester {{ student.semester }} - {{ student.department }}
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <div class="select-group">
+
+                    <label>
+                        Select Student
+                    </label>
+
+                    <select id="studentSelect">
+
+                        <option value="">
+                            Select Student
+                        </option>
+
+                        {% for student in students %}
+
+                        <option value="{{ student.id }}"
+                                data-name="{{ student.name }}"
+                                data-email="{{ student.email }}"
+                                data-semester="{{ student.semester }}"
+                                data-department="{{ student.department }}">
+
+                            {{ student.name }}
+
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <button class="start-btn"
+                        type="button"
+                        onclick="startEvaluation()">
+
+                    <i class="bi bi-pencil-square"></i>
+
+                    Start Evaluation
+
+                </button>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             EVALUATION FORM
+        ================================================== -->
+
+        <form method="POST"
+              action="{{ url_for('teacher_evaluation_submit') }}"
+              id="evaluationForm">
+
+            <section class="evaluation-card">
+
+
+                <div class="card-heading">
+
+                    <div>
+
+                        <h3>Student Evaluation Form</h3>
+
+                        <p>
+                            Provide an overall assessment of the student's
+                            academic and personal development.
+                        </p>
+
+                    </div>
+
+
+                    <span class="form-status">
+                        Draft
+                    </span>
+
+                </div>
+
+
+
+                <!-- STUDENT INFO -->
+
+                <div class="selected-student">
+
+                    <div class="selected-avatar"
+                         id="selectedAvatar">
+                        --
+                    </div>
+
+                    <div>
+
+                        <strong id="selectedStudentName">
+                            Select a student
+                        </strong>
+
+                        <span id="selectedStudentInfo">
+                            Choose a student above to begin evaluation.
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Hidden student ID sent to Flask -->
+
+                <input type="hidden"
+                       name="student_id"
+                       id="selectedStudentId">
+
+
+
+                <!-- =================================================
+                     ACADEMIC PERFORMANCE
+                ================================================== -->
+
+                <div class="evaluation-section">
+
+                    <div class="section-title">
+
+                        <div class="section-number">
+                            01
+                        </div>
+
+                        <div>
+
+                            <h4>Academic Performance</h4>
+
+                            <p>
+                                Assess the student's academic progress.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="rating-grid">
+
+
+                        <div class="rating-item">
+
+                            <label>
+                                Subject Knowledge
+                            </label>
+
+                            <select name="knowledge"
+                                    required>
+
+                                <option value="Excellent">
+                                    Excellent
+                                </option>
+
+                                <option value="Good" selected>
+                                    Good
+                                </option>
+
+                                <option value="Average">
+                                    Average
+                                </option>
+
+                                <option value="Needs Improvement">
+                                    Needs Improvement
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="rating-item">
+
+                            <label>
+                                Concept Understanding
+                            </label>
+
+                            <select name="concept_understanding"
+                                    required>
+
+                                <option value="Excellent">
+                                    Excellent
+                                </option>
+
+                                <option value="Good" selected>
+                                    Good
+                                </option>
+
+                                <option value="Average">
+                                    Average
+                                </option>
+
+                                <option value="Needs Improvement">
+                                    Needs Improvement
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="rating-item">
+
+                            <label>
+                                Assignment Quality
+                            </label>
+
+                            <select name="assignment_quality"
+                                    required>
+
+                                <option value="Excellent">
+                                    Excellent
+                                </option>
+
+                                <option value="Good">
+                                    Good
+                                </option>
+
+                                <option value="Average" selected>
+                                    Average
+                                </option>
+
+                                <option value="Needs Improvement">
+                                    Needs Improvement
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="rating-item">
+
+                            <label>
+                                Academic Progress
+                            </label>
+
+                            <select name="academic_progress"
+                                    required>
+
+                                <option value="Excellent">
+                                    Excellent
+                                </option>
+
+                                <option value="Good" selected>
+                                    Good
+                                </option>
+
+                                <option value="Average">
+                                    Average
+                                </option>
+
+                                <option value="Needs Improvement">
+                                    Needs Improvement
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     STUDENT ACTIVITY
+                ================================================== -->
+
+                <div class="evaluation-section">
+
+                    <div class="section-title">
+
+                        <div class="section-number">
+                            02
+                        </div>
+
+                        <div>
+
+                            <h4>Student Activity</h4>
+
+                            <p>
+                                Evaluate participation and engagement.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="rating-grid">
+
+
+                        <div class="rating-item">
+
+                            <label>
+                                Class Participation
+                            </label>
+
+                            <select name="activity"
+                                    required>
+
+                                <option value="Excellent">
+                                    Excellent
+                                </option>
+
+                                <option value="Good" selected>
+                                    Good
+                                </option>
+
+                                <option value="Average">
+                                    Average
+                                </option>
+
+                                <option value="Needs Improvement">
+                                    Needs Improvement
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="rating-item">
+
+                            <label>
+                                Attendance
+                            </label>
+
+                            <select name="attendance_rating"
+                                    required>
+
+                                <option value="Excellent">
+                                    Excellent
+                                </option>
+
+                                <option value="Good" selected>
+                                    Good
+                                </option>
+
+                                <option value="Average">
+                                    Average
+                                </option>
+
+                                <option value="Needs Improvement">
+                                    Needs Improvement
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="rating-item">
+
+                            <label>
+                                Teamwork
+                            </label>
+
+                            <select name="teamwork"
+                                    required>
+
+                                <option value="Excellent">
+                                    Excellent
+                                </option>
+
+                                <option value="Good">
+                                    Good
+                                </option>
+
+                                <option value="Average" selected>
+                                    Average
+                                </option>
+
+                                <option value="Needs Improvement">
+                                    Needs Improvement
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="rating-item">
+
+                            <label>
+                                Initiative
+                            </label>
+
+                            <select name="initiative"
+                                    required>
+
+                                <option value="Excellent">
+                                    Excellent
+                                </option>
+
+                                <option value="Good">
+                                    Good
+                                </option>
+
+                                <option value="Average" selected>
+                                    Average
+                                </option>
+
+                                <option value="Needs Improvement">
+                                    Needs Improvement
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     PERSONALITY & BEHAVIOUR
+                ================================================== -->
+
+                <div class="evaluation-section">
+
+                    <div class="section-title">
+
+                        <div class="section-number">
+                            03
+                        </div>
+
+                        <div>
+
+                            <h4>Personality & Behaviour</h4>
+
+                            <p>
+                                Assess communication and professional qualities.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="rating-grid">
+
+
+                        <div class="rating-item">
+
+                            <label>
+                                Communication
+                            </label>
+
+                            <select name="personality"
+                                    required>
+
+                                <option value="Excellent">
+                                    Excellent
+                                </option>
+
+                                <option value="Good" selected>
+                                    Good
+                                </option>
+
+                                <option value="Average">
+                                    Average
+                                </option>
+
+                                <option value="Needs Improvement">
+                                    Needs Improvement
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="rating-item">
+
+                            <label>
+                                Leadership
+                            </label>
+
+                            <select name="leadership"
+                                    required>
+
+                                <option value="Excellent">
+                                    Excellent
+                                </option>
+
+                                <option value="Good">
+                                    Good
+                                </option>
+
+                                <option value="Average" selected>
+                                    Average
+                                </option>
+
+                                <option value="Needs Improvement">
+                                    Needs Improvement
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="rating-item">
+
+                            <label>
+                                Problem Solving
+                            </label>
+
+                            <select name="problem_solving"
+                                    required>
+
+                                <option value="Excellent">
+                                    Excellent
+                                </option>
+
+                                <option value="Good" selected>
+                                    Good
+                                </option>
+
+                                <option value="Average">
+                                    Average
+                                </option>
+
+                                <option value="Needs Improvement">
+                                    Needs Improvement
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="rating-item">
+
+                            <label>
+                                Professional Behaviour
+                            </label>
+
+                            <select name="professional_behaviour"
+                                    required>
+
+                                <option value="Excellent">
+                                    Excellent
+                                </option>
+
+                                <option value="Good" selected>
+                                    Good
+                                </option>
+
+                                <option value="Average">
+                                    Average
+                                </option>
+
+                                <option value="Needs Improvement">
+                                    Needs Improvement
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     TEACHER FEEDBACK
+                ================================================== -->
+
+                <div class="evaluation-section">
+
+                    <div class="section-title">
+
+                        <div class="section-number">
+                            04
+                        </div>
+
+                        <div>
+
+                            <h4>Teacher Feedback</h4>
+
+                            <p>
+                                Add suggestions and observations for the student.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="feedback-grid">
+
+
+                        <div class="feedback-group">
+
+                            <label>
+                                Strengths
+                            </label>
+
+                            <textarea
+                                name="remarks"
+                                placeholder="Write the student's key strengths..."
+                            ></textarea>
+
+                        </div>
+
+
+                        <div class="feedback-group">
+
+                            <label>
+                                Areas for Improvement
+                            </label>
+
+                            <textarea
+                                name="improvement"
+                                placeholder="Mention areas where the student can improve..."
+                            ></textarea>
+
+                        </div>
+
+
+                        <div class="feedback-group full">
+
+                            <label>
+                                Teacher's Suggestion
+                            </label>
+
+                            <textarea
+                                name="suggestion"
+                                placeholder="Provide guidance or suggestions for the student's future development..."
+                            ></textarea>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     FORM ACTIONS
+                ================================================== -->
+
+                <div class="form-actions">
+
+                    <button class="save-draft"
+                            type="button"
+                            onclick="saveDraft()">
+
+                        <i class="bi bi-save"></i>
+
+                        Save Draft
+
+                    </button>
+
+
+                    <button class="submit-evaluation"
+                            type="submit">
+
+                        <i class="bi bi-check2-circle"></i>
+
+                        Submit Evaluation
+
+                    </button>
+
+                </div>
+
+
+            </section>
+
+        </form>
+
+
+    </main>
+
+</div>
+
+
+
+<script>
+
+function startEvaluation() {
+
+    const studentSelect =
+        document.getElementById("studentSelect");
+
+    const selectedOption =
+        studentSelect.options[studentSelect.selectedIndex];
+
+    const studentId =
+        studentSelect.value;
+
+    if (!studentId) {
+
+        alert("Please select a student first.");
+
+        return;
+
+    }
+
+
+    const studentName =
+        selectedOption.dataset.name;
+
+    const semester =
+        selectedOption.dataset.semester;
+
+    const department =
+        selectedOption.dataset.department;
+
+
+    document.getElementById("selectedStudentId").value =
+        studentId;
+
+
+    document.getElementById("selectedStudentName").textContent =
+        studentName;
+
+
+    document.getElementById("selectedStudentInfo").textContent =
+        "STU-" +
+        String(studentId).padStart(3, "0") +
+        " • Semester " +
+        semester +
+        " • " +
+        department;
+
+
+    const initials =
+        studentName
+            .split(" ")
+            .map(word => word.charAt(0))
+            .join("")
+            .substring(0, 2)
+            .toUpperCase();
+
+
+    document.getElementById("selectedAvatar").textContent =
+        initials;
+
+
+    console.log("Evaluation started for: " + studentName);
+
+}
+
+
+function saveDraft() {
+
+    const studentId =
+        document.getElementById("studentSelect").value;
+
+    if (!studentId) {
+
+        alert("Please select a student first.");
+
+        return;
+
+    }
+
+    document.getElementById("selectedStudentId").value =
+        studentId;
+
+    console.log("Draft saved successfully.");
+
+}
+
+
+document.getElementById("studentSelect")
+    .addEventListener("change", function () {
+
+        if (!this.value) {
+            return;
+        }
+
+        const option =
+            this.options[this.selectedIndex];
+
+        document.getElementById("selectedStudentId").value =
+            this.value;
+
+        document.getElementById("selectedStudentName").textContent =
+            option.dataset.name;
+
+        document.getElementById("selectedStudentInfo").textContent =
+            "STU-" +
+            String(this.value).padStart(3, "0") +
+            " • Semester " +
+            option.dataset.semester +
+            " • " +
+            option.dataset.department;
+
+        const initials =
+            option.dataset.name
+                .split(" ")
+                .map(word => word.charAt(0))
+                .join("")
+                .substring(0, 2)
+                .toUpperCase();
+
+        document.getElementById("selectedAvatar").textContent =
+            initials;
+
+    });
+
+// Search input handling for Student Evaluation
+const evalSearch = document.getElementById("evaluationSearchInput");
+if (evalSearch) {
+    evalSearch.addEventListener("input", function() {
+        const query = evalSearch.value.trim().toLowerCase();
+        const studentSelect = document.getElementById("studentSelect");
+        if (!studentSelect) return;
+
+        let firstMatch = null;
+        for (let i = 1; i < studentSelect.options.length; i++) {
+            const opt = studentSelect.options[i];
+            const name = (opt.dataset.name || opt.text).toLowerCase();
+            const matches = !query || name.includes(query);
+            opt.style.display = matches ? "" : "none";
+            if (matches && !firstMatch) {
+                firstMatch = opt;
+            }
+        }
+
+        if (query && firstMatch) {
+            studentSelect.value = firstMatch.value;
+            studentSelect.dispatchEvent(new Event("change"));
+        }
+    });
+
+    evalSearch.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            startEvaluation();
+        }
+    });
+}
+
+</script>
+
+</body>
+</html>

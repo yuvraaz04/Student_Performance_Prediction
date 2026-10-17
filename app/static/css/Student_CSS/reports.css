@@ -1,0 +1,794 @@
+/* =====================================================
+   REPORTS PAGE
+===================================================== */
+
+.main-content {
+    margin-left: 260px;
+    width: calc(100% - 260px);
+    min-height: 100vh;
+    padding: 30px;
+    background: #f7f7fb;
+}
+
+
+/* =====================================================
+   PAGE HEADER
+===================================================== */
+
+.reports-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 25px;
+    margin-bottom: 28px;
+}
+
+.header-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.page-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    width: fit-content;
+
+    color: #5B3DF5;
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: 1px;
+
+    margin-bottom: 6px;
+}
+
+.header-text h1 {
+    margin: 0;
+
+    color: #242238;
+
+    font-size: 30px;
+    font-weight: 700;
+}
+
+.header-text p {
+    margin-top: 6px;
+
+    color: #85839a;
+
+    font-size: 13px;
+}
+
+
+/* =====================================================
+   GENERATE BUTTON
+===================================================== */
+
+.generate-btn {
+    border: none;
+
+    background: linear-gradient(
+        135deg,
+        #6C63FF,
+        #5B3DF5
+    );
+
+    color: white;
+
+    padding: 13px 20px;
+
+    border-radius: 12px;
+
+    font-family: inherit;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    cursor: pointer;
+
+    box-shadow: 0 7px 18px rgba(91, 61, 245, 0.18);
+
+    transition: 0.25s ease;
+}
+
+.generate-btn:hover {
+    transform: translateY(-2px);
+
+    box-shadow: 0 10px 22px rgba(91, 61, 245, 0.25);
+}
+
+
+/* =====================================================
+   REPORT STATISTICS
+===================================================== */
+
+.report-stats {
+    display: grid;
+
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 18px;
+
+    margin-bottom: 25px;
+}
+
+.report-stat-card {
+    background: white;
+
+    border: 1px solid #eeeef5;
+
+    border-radius: 17px;
+
+    padding: 20px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 15px;
+
+    box-shadow: 0 5px 18px rgba(35, 29, 80, 0.04);
+
+    transition: 0.25s ease;
+}
+
+.report-stat-card:hover {
+    transform: translateY(-3px);
+
+    box-shadow: 0 9px 25px rgba(35, 29, 80, 0.08);
+}
+
+
+/* =====================================================
+   STAT ICON
+===================================================== */
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+
+    border-radius: 13px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 21px;
+
+    flex-shrink: 0;
+}
+
+.stat-icon.purple {
+    background: #efedff;
+    color: #5B3DF5;
+}
+
+.stat-icon.blue {
+    background: #eaf4ff;
+    color: #3988e8;
+}
+
+.stat-icon.orange {
+    background: #fff3e5;
+    color: #e9952e;
+}
+
+.stat-icon.green {
+    background: #e9f8f0;
+    color: #27a568;
+}
+
+
+/* =====================================================
+   STAT CONTENT
+===================================================== */
+
+.stat-content {
+    min-width: 0;
+}
+
+.stat-content span {
+    display: block;
+
+    color: #85839a;
+
+    font-size: 11px;
+    font-weight: 500;
+
+    margin-bottom: 3px;
+}
+
+.stat-content h2 {
+    margin: 0;
+
+    color: #27243a;
+
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.stat-content small {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    margin-top: 3px;
+
+    color: #aaa8b9;
+
+    font-size: 9px;
+}
+
+.stat-content small i {
+    color: #27a568;
+}
+
+
+/* =====================================================
+   REPORT TABLE CARD
+===================================================== */
+
+.reports-table-card {
+    background: white;
+
+    border: 1px solid #eeeef5;
+
+    border-radius: 19px;
+
+    padding: 24px;
+
+    box-shadow: 0 5px 18px rgba(35, 29, 80, 0.04);
+}
+
+
+/* =====================================================
+   TABLE HEADER
+===================================================== */
+
+.table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 20px;
+}
+
+.table-header h2 {
+    margin: 0;
+
+    color: #28253b;
+
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.table-header p {
+    margin-top: 4px;
+
+    color: #9896a9;
+
+    font-size: 11px;
+}
+
+
+/* =====================================================
+   FILTER
+===================================================== */
+
+.report-filter select {
+    border: 1px solid #e7e6ef;
+
+    background: #fafafd;
+
+    color: #555268;
+
+    padding: 9px 12px;
+
+    border-radius: 9px;
+
+    font-family: inherit;
+
+    font-size: 11px;
+
+    outline: none;
+
+    cursor: pointer;
+}
+
+
+/* =====================================================
+   TABLE
+===================================================== */
+
+.table-wrapper {
+    width: 100%;
+
+    overflow-x: auto;
+}
+
+.reports-table {
+    width: 100%;
+
+    border-collapse: collapse;
+}
+
+.reports-table thead {
+    background: #fafafe;
+}
+
+.reports-table th {
+    padding: 13px 15px;
+
+    text-align: left;
+
+    color: #89879b;
+
+    font-size: 10px;
+    font-weight: 600;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.4px;
+
+    border-bottom: 1px solid #eeeeF5;
+}
+
+.reports-table td {
+    padding: 15px;
+
+    color: #625f72;
+
+    font-size: 11px;
+
+    border-bottom: 1px solid #f0eff5;
+}
+
+.reports-table tbody tr {
+    transition: 0.2s ease;
+}
+
+.reports-table tbody tr:hover {
+    background: #faf9ff;
+}
+
+.reports-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+
+/* =====================================================
+   REPORT NAME
+===================================================== */
+
+.report-name {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+}
+
+.report-file-icon {
+    width: 39px;
+    height: 39px;
+
+    border-radius: 10px;
+
+    background: #efedff;
+
+    color: #5B3DF5;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 17px;
+
+    flex-shrink: 0;
+}
+
+.report-name strong {
+    display: block;
+
+    color: #363346;
+
+    font-size: 11px;
+
+    font-weight: 600;
+}
+
+.report-name span {
+    display: block;
+
+    color: #a09eaf;
+
+    font-size: 9px;
+
+    margin-top: 3px;
+}
+
+
+/* =====================================================
+   TYPE BADGES
+===================================================== */
+
+.type-badge {
+    display: inline-flex;
+
+    align-items: center;
+
+    padding: 5px 9px;
+
+    border-radius: 20px;
+
+    font-size: 9px;
+
+    font-weight: 600;
+}
+
+.type-badge.performance {
+    background: #efedff;
+    color: #5B3DF5;
+}
+
+.type-badge.risk {
+    background: #fff1e4;
+    color: #df8b27;
+}
+
+.type-badge.prediction {
+    background: #e9f3ff;
+    color: #3887dc;
+}
+
+
+/* =====================================================
+   STATUS
+===================================================== */
+
+.status-badge {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    padding: 5px 9px;
+
+    border-radius: 20px;
+
+    font-size: 9px;
+
+    font-weight: 600;
+}
+
+.status-badge.completed {
+    background: #eaf8f0;
+
+    color: #2b9d67;
+}
+
+
+/* =====================================================
+   ACTION BUTTONS
+===================================================== */
+
+.action-buttons {
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+}
+
+.action-btn {
+    width: 31px;
+    height: 31px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.action-btn.view {
+    background: #efedff;
+
+    color: #5B3DF5;
+}
+
+.action-btn.download {
+    background: #f0f7ff;
+
+    color: #3988e8;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+}
+
+
+/* =====================================================
+   MODAL
+===================================================== */
+
+.report-modal {
+    position: fixed;
+
+    inset: 0;
+
+    display: none;
+
+    align-items: center;
+    justify-content: center;
+
+    z-index: 2000;
+}
+
+.report-modal.show {
+    display: flex;
+}
+
+.modal-overlay {
+    position: absolute;
+
+    inset: 0;
+
+    background: rgba(25, 21, 55, 0.42);
+
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    position: relative;
+
+    width: 480px;
+
+    max-width: calc(100% - 40px);
+
+    background: white;
+
+    border-radius: 20px;
+
+    padding: 25px;
+
+    box-shadow: 0 20px 60px rgba(35, 29, 80, 0.2);
+
+    z-index: 1;
+}
+
+
+/* =====================================================
+   MODAL HEADER
+===================================================== */
+
+.modal-header {
+    display: flex;
+
+    align-items: flex-start;
+    justify-content: space-between;
+
+    margin-bottom: 22px;
+}
+
+.modal-header > div:first-child {
+    display: flex;
+
+    align-items: center;
+
+    gap: 13px;
+}
+
+.modal-icon {
+    width: 43px;
+    height: 43px;
+
+    border-radius: 12px;
+
+    background: #efedff;
+
+    color: #5B3DF5;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 19px;
+}
+
+.modal-header h2 {
+    margin: 0;
+
+    color: #2b2840;
+
+    font-size: 18px;
+}
+
+.modal-header p {
+    margin-top: 3px;
+
+    color: #9693a7;
+
+    font-size: 10px;
+}
+
+.modal-close {
+    border: none;
+
+    background: #f5f4f9;
+
+    color: #777486;
+
+    width: 31px;
+    height: 31px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* =====================================================
+   REPORT OPTIONS
+===================================================== */
+
+.report-options {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+.report-option {
+    width: 100%;
+
+    border: 1px solid #eeeeF5;
+
+    background: white;
+
+    border-radius: 12px;
+
+    padding: 14px;
+
+    display: grid;
+
+    grid-template-columns: 38px 1fr 18px;
+
+    align-items: center;
+
+    gap: 12px;
+
+    text-align: left;
+
+    font-family: inherit;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.report-option > i:first-child {
+    width: 38px;
+    height: 38px;
+
+    border-radius: 10px;
+
+    background: #efedff;
+
+    color: #5B3DF5;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+}
+
+.report-option > i:last-child {
+    color: #aaa7b7;
+
+    font-size: 12px;
+}
+
+.report-option strong {
+    display: block;
+
+    color: #383548;
+
+    font-size: 11px;
+}
+
+.report-option span {
+    display: block;
+
+    margin-top: 3px;
+
+    color: #9997a9;
+
+    font-size: 9px;
+}
+
+.report-option:hover {
+    border-color: #dcd7ff;
+
+    background: #faf9ff;
+
+    transform: translateX(2px);
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 1150px) {
+
+    .report-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+
+@media (max-width: 800px) {
+
+    .reports-header {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .generate-btn {
+        width: fit-content;
+    }
+
+}
+
+
+@media (max-width: 650px) {
+
+    .main-content {
+        margin-left: 260px;
+
+        width: calc(100% - 260px);
+
+        padding: 20px;
+    }
+
+    .report-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .reports-table-card {
+        padding: 15px;
+    }
+
+    .table-header {
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 12px;
+    }
+
+}

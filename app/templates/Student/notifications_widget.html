@@ -1,0 +1,161 @@
+<!-- =========================================================
+     STUDENT NOTIFICATION DROPDOWN WIDGET
+     ========================================================= -->
+<div class="notif-dropdown-container" id="studentNotifContainer">
+    <button type="button"
+            class="student-notif-btn"
+            id="studentNotifBtn"
+            title="Notifications"
+            onclick="toggleStudentNotifMenu(event)">
+        <i class="bi bi-bell-fill"></i>
+        <span class="student-notif-badge" id="studentNotifBadge">3</span>
+    </button>
+
+    <div class="student-notif-menu" id="studentNotifMenu">
+        <div class="notif-menu-header">
+            <div class="notif-title-wrap">
+                <i class="bi bi-bell" style="color: #6366f1;"></i>
+                <h4>Notifications</h4>
+                <span class="notif-count-pill" id="notifPillText">3 new</span>
+            </div>
+            <button type="button"
+                    class="notif-mark-read-btn"
+                    id="markReadBtn"
+                    onclick="markAllStudentNotifsRead(event)">
+                Mark all read
+            </button>
+        </div>
+
+        <div class="notif-items-list" id="notifItemsList">
+            <!-- 1. Attendance Notification -->
+            <a href="/analytics" class="notif-item unread" data-notif-id="att">
+                <div class="notif-item-icon green">
+                    <i class="bi bi-calendar-check-fill"></i>
+                </div>
+                <div class="notif-item-content">
+                    <div class="notif-item-header">
+                        <h5 class="notif-item-title">Attendance Recorded</h5>
+                        <span class="notif-item-time">Today</span>
+                    </div>
+                    <p class="notif-item-desc">
+                        Current attendance: <strong>{{ student.average_attendance|default(85)|round(0)|int }}%</strong>. Keep maintaining regular attendance across all courses!
+                    </p>
+                </div>
+            </a>
+
+            <!-- 2. Academic Evaluation Notification -->
+            <a href="/students" class="notif-item unread" data-notif-id="eval">
+                <div class="notif-item-icon purple">
+                    <i class="bi bi-award-fill"></i>
+                </div>
+                <div class="notif-item-content">
+                    <div class="notif-item-header">
+                        <h5 class="notif-item-title">Faculty Academic Review</h5>
+                        <span class="notif-item-time">Yesterday</span>
+                    </div>
+                    <p class="notif-item-desc">
+                        Your semester evaluation is active for {{ student.department|default('Engineering') }} (Semester {{ student.semester|default(4) }}).
+                    </p>
+                </div>
+            </a>
+
+            <!-- 3. Report Ready Notification -->
+            <a href="/reports" class="notif-item unread" data-notif-id="rep">
+                <div class="notif-item-icon blue">
+                    <i class="bi bi-file-earmark-bar-graph-fill"></i>
+                </div>
+                <div class="notif-item-content">
+                    <div class="notif-item-header">
+                        <h5 class="notif-item-title">Performance Report Ready</h5>
+                        <span class="notif-item-time">2d ago</span>
+                    </div>
+                    <p class="notif-item-desc">
+                        Updated academic intelligence and risk evaluation summary is available in your Reports center.
+                    </p>
+                </div>
+            </a>
+        </div>
+
+        <div class="notif-menu-footer">
+            <a href="/reports">
+                <span>View Academic Reports</span>
+                <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleStudentNotifMenu(e) {
+    if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+    }
+    const menu = document.getElementById('studentNotifMenu');
+    if (menu) {
+        menu.classList.toggle('active');
+    }
+}
+
+function markAllStudentNotifsRead(e) {
+    if (e) {
+        e.stopPropagation();
+        e.preventDefault();
+    }
+    const badge = document.getElementById('studentNotifBadge');
+    const pill = document.getElementById('notifPillText');
+    const items = document.querySelectorAll('#notifItemsList .notif-item');
+
+    if (badge) {
+        badge.classList.add('hidden');
+        badge.textContent = '0';
+    }
+    if (pill) {
+        pill.textContent = '0 unread';
+        pill.style.background = '#f1f5f9';
+        pill.style.color = '#64748b';
+    }
+    items.forEach(it => {
+        it.classList.remove('unread');
+    });
+
+    try {
+        localStorage.setItem('student_notifs_read_state', 'all_read');
+    } catch (err) {}
+}
+
+// Restore read status on page load
+(function initStudentNotifs() {
+    try {
+        if (localStorage.getItem('student_notifs_read_state') === 'all_read') {
+            const badge = document.getElementById('studentNotifBadge');
+            const pill = document.getElementById('notifPillText');
+            const items = document.querySelectorAll('#notifItemsList .notif-item');
+            if (badge) badge.classList.add('hidden');
+            if (pill) {
+                pill.textContent = '0 unread';
+                pill.style.background = '#f1f5f9';
+                pill.style.color = '#64748b';
+            }
+            items.forEach(it => it.classList.remove('unread'));
+        }
+    } catch (err) {}
+
+    // Close on outside click
+    document.addEventListener('click', function(e) {
+        const container = document.getElementById('studentNotifContainer');
+        const menu = document.getElementById('studentNotifMenu');
+        if (menu && container && !container.contains(e.target)) {
+            menu.classList.remove('active');
+        }
+    });
+
+    // Close on Esc
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const menu = document.getElementById('studentNotifMenu');
+            if (menu) menu.classList.remove('active');
+        }
+    });
+})();
+</script>

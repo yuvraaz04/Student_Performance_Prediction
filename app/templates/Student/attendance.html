@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance | StudentIQ</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- CSS Links -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Student_CSS/sidebar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Student_CSS/notifications.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Student_CSS/attendance.css') }}">
+
+    <style>
+        .flash-msg {
+            padding: 14px 20px;
+            margin-bottom: 22px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .flash-info { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+        .flash-success { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+        .flash-warning { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+        .flash-danger { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+    </style>
+</head>
+
+<body>
+
+    <!-- ================= SIDEBAR ================= -->
+    {% include 'Student/sidebar.html' %}
+
+    <!-- ================= MAIN CONTENT ================= -->
+    <main class="main-content">
+
+        <!-- FLASH MESSAGES -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-msg flash-{{ category }}">
+                        <i class="bi bi-info-circle-fill"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- PAGE HEADER -->
+        <header class="attendance-header">
+            <div class="header-text">
+                <span class="page-label">
+                    <i class="bi bi-calendar-check-fill"></i>
+                    Academic Attendance
+                </span>
+                <h1>My Attendance</h1>
+                <p>
+                    Track your subject-wise attendance percentage, total classes held, and total classes taken.
+                </p>
+            </div>
+
+            <div class="header-actions">
+                <!-- Notification Dropdown -->
+                {% include 'Student/notifications_widget.html' %}
+
+                <!-- Profile -->
+                <div class="student-profile" onclick="window.location.href='/settings'" title="View Profile / Settings">
+                    <div class="profile-avatar">
+                        {% if current_avatar %}
+                            <img src="{{ current_avatar }}" alt="{{ student.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% elif student and student.profile_pic %}
+                            <img src="{{ url_for('static', filename=student.profile_pic) }}" alt="{{ student.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            {{ student.name[:2]|upper if student else 'ST' }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- KPI SUMMARY CARDS -->
+        <section class="kpi-grid">
+            <!-- 1. Overall Attendance -->
+            <div class="kpi-card">
+                <div class="kpi-card-top">
+                    <h5>Overall Attendance</h5>
+                    <div class="kpi-icon purple">
+                        <i class="bi bi-pie-chart-fill"></i>
+                    </div>
+                </div>
+                <div class="kpi-number {% if overall_percentage >= 85 %}pct-good{% elif overall_percentage >= 75 %}pct-warning{% else %}pct-danger{% endif %}">
+                    {{ overall_percentage }}%
+                </div>
+                <div class="kpi-subtext">
+                    {% if overall_percentage >= 85 %}
+                        <span class="kpi-badge badge-good"><i class="bi bi-check-circle-fill"></i> Good Standing</span>
+                    {% elif overall_percentage >= 75 %}
+                        <span class="kpi-badge badge-warning"><i class="bi bi-exclamation-circle-fill"></i> Eligible (>=75%)</span>
+                    {% else %}
+                        <span class="kpi-badge badge-danger"><i class="bi bi-exclamation-triangle-fill"></i> Shortage Alert (<75%)</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- 2. Total Classes Held -->
+            <div class="kpi-card">
+                <div class="kpi-card-top">
+                    <h5>Total Classes Held</h5>
+                    <div class="kpi-icon blue">
+                        <i class="bi bi-calendar-range-fill"></i>
+                    </div>
+                </div>
+                <div class="kpi-number">
+                    {{ total_classes_held }}
+                </div>
+                <div class="kpi-subtext">
+                    <i class="bi bi-journal-check"></i> Across {{ attendance_records|length }} course subjects
+                </div>
+            </div>
+
+            <!-- 3. Total Classes Taken -->
+            <div class="kpi-card">
+                <div class="kpi-card-top">
+                    <h5>Total Classes Taken</h5>
+                    <div class="kpi-icon green">
+                        <i class="bi bi-check2-circle"></i>
+                    </div>
+                </div>
+                <div class="kpi-number" style="color: #059669;">
+                    {{ total_classes_taken }}
+                </div>
+                <div class="kpi-subtext">
+                    <i class="bi bi-person-check-fill"></i> Attended lectures & practicals
+                </div>
+            </div>
+
+            <!-- 4. Classes Missed -->
+            <div class="kpi-card">
+                <div class="kpi-card-top">
+                    <h5>Classes Missed</h5>
+                    <div class="kpi-icon red">
+                        <i class="bi bi-x-circle-fill"></i>
+                    </div>
+                </div>
+                <div class="kpi-number" style="color: {% if total_classes_missed > 15 %}#dc2626{% else %}#64748b{% endif %};">
+                    {{ total_classes_missed }}
+                </div>
+                <div class="kpi-subtext">
+                    <i class="bi bi-dash-circle"></i> Total absences recorded
+                </div>
+            </div>
+        </section>
+
+        <!-- SUBJECT-WISE ATTENDANCE SECTION -->
+        <section class="attendance-card">
+            <div class="attendance-card-header">
+                <div>
+                    <h2>Subject-Wise Attendance Breakdown</h2>
+                    <p>
+                        Comprehensive attendance log for {{ student.name }} &bull; {{ student.department }} (Semester {{ student.semester }})
+                    </p>
+                </div>
+
+                <div class="attendance-filter-tabs">
+                    <button type="button" class="filter-tab active" data-filter="all">
+                        All ({{ attendance_records|length }})
+                    </button>
+                    <button type="button" class="filter-tab" data-filter="eligible">
+                        Eligible &ge;75% ({{ subjects_eligible }})
+                    </button>
+                    <button type="button" class="filter-tab" data-filter="shortage">
+                        Shortage &lt;75% ({{ subjects_at_risk }})
+                    </button>
+                </div>
+            </div>
+
+            <!-- TABLE VIEW -->
+            <div class="table-responsive">
+                <table class="attendance-table" id="attendanceTable">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th style="text-align: center;">Total Classes Held</th>
+                            <th style="text-align: center;">Total Classes Taken</th>
+                            <th style="text-align: center;">Classes Missed</th>
+                            <th>Attendance Progress</th>
+                            <th style="text-align: right;">Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceTableBody">
+                        {% for record in attendance_records %}
+                        <tr class="attendance-row"
+                            data-subject="{{ record.subject|lower }}"
+                            data-eligible="{{ 'true' if record.is_eligible else 'false' }}">
+                            
+                            <!-- Subject -->
+                            <td>
+                                <div class="subject-cell">
+                                    <div class="subject-icon">
+                                        <i class="bi bi-book-half"></i>
+                                    </div>
+                                    <div class="subject-info">
+                                        <strong>{{ record.subject }}</strong>
+                                        <span>{{ student.department }} &bull; Sem {{ student.semester }}</span>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Total Classes Held -->
+                            <td style="text-align: center;">
+                                <span class="number-cell">{{ record.total_classes }}</span>
+                                <div style="font-size: 11px; color: #94a3b8;">lectures held</div>
+                            </td>
+
+                            <!-- Total Classes Taken -->
+                            <td style="text-align: center;">
+                                <span class="number-cell" style="color: #059669;">{{ record.attended_classes }}</span>
+                                <div style="font-size: 11px; color: #059669;">attended</div>
+                            </td>
+
+                            <!-- Classes Missed -->
+                            <td style="text-align: center;">
+                                <span class="number-cell" style="color: {% if record.missed_classes > 5 %}#dc2626{% else %}#64748b{% endif %};">
+                                    {{ record.missed_classes }}
+                                </span>
+                                <div style="font-size: 11px; color: #94a3b8;">absences</div>
+                            </td>
+
+                            <!-- Attendance Progress Bar -->
+                            <td class="progress-cell">
+                                <div class="progress-bar-bg">
+                                    <div class="progress-bar-fill {% if record.percentage >= 85 %}fill-good{% elif record.percentage >= 75 %}fill-warning{% else %}fill-danger{% endif %}"
+                                         style="width: {{ [100, record.percentage]|min }}%;"></div>
+                                </div>
+                                <div style="font-size: 11px; color: #64748b; display: flex; justify-content: space-between;">
+                                    <span>0%</span>
+                                    <span>Target 75%</span>
+                                    <span>100%</span>
+                                </div>
+                            </td>
+
+                            <!-- Percentage -->
+                            <td style="text-align: right;">
+                                <span class="pct-text {% if record.percentage >= 85 %}pct-good{% elif record.percentage >= 75 %}pct-warning{% else %}pct-danger{% endif %}">
+                                    {{ "%.1f"|format(record.percentage) }}%
+                                </span>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 30px; color: #94a3b8;">
+                                No attendance records currently available.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- SUBJECT CARDS GRID (Visual Breakdown) -->
+            <div class="subject-grid" id="attendanceGrid">
+                {% for record in attendance_records %}
+                <div class="subject-stat-card attendance-card-item"
+                     data-subject="{{ record.subject|lower }}"
+                     data-eligible="{{ 'true' if record.is_eligible else 'false' }}">
+                    <div class="card-top">
+                        <div class="card-subject-name">{{ record.subject }}</div>
+                        <span class="pct-text {% if record.percentage >= 85 %}pct-good{% elif record.percentage >= 75 %}pct-warning{% else %}pct-danger{% endif %}" style="font-size: 15px;">
+                            {{ "%.1f"|format(record.percentage) }}%
+                        </span>
+                    </div>
+
+                    <div class="progress-bar-bg" style="margin: 10px 0 6px 0;">
+                        <div class="progress-bar-fill {% if record.percentage >= 85 %}fill-good{% elif record.percentage >= 75 %}fill-warning{% else %}fill-danger{% endif %}"
+                             style="width: {{ [100, record.percentage]|min }}%;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 12px;">
+                        <span style="color: #64748b;">Progress</span>
+                        <span style="color: #64748b;">Target 75%</span>
+                    </div>
+
+                    <div class="card-stats-row">
+                        <div class="card-stat-item">
+                            <span>Classes Held</span>
+                            <strong>{{ record.total_classes }}</strong>
+                        </div>
+                        <div class="card-stat-item">
+                            <span>Classes Taken</span>
+                            <strong style="color: #059669;">{{ record.attended_classes }}</strong>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- INSTITUTIONAL POLICY BANNER -->
+        <section class="policy-banner">
+            <div class="policy-icon">
+                <i class="bi bi-shield-check"></i>
+            </div>
+            <div class="policy-content">
+                <h4>75% Attendance Requirement Policy</h4>
+                <p>
+                    Students are required to maintain a minimum of 75% attendance in each course module to be eligible for end-semester examinations.
+                    If your attendance is below 75%, please reach out to your faculty instructor or academic advisor for condonation procedures.
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FILTER SCRIPT -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const filterTabs = document.querySelectorAll(".filter-tab");
+            const rows = document.querySelectorAll(".attendance-row");
+            const cards = document.querySelectorAll(".attendance-card-item");
+
+            let currentFilter = "all";
+
+            function applyFilters() {
+                rows.forEach(row => {
+                    const isEligible = row.getAttribute("data-eligible") === "true";
+                    let matchesFilter = true;
+
+                    if (currentFilter === "eligible") {
+                        matchesFilter = isEligible;
+                    } else if (currentFilter === "shortage") {
+                        matchesFilter = !isEligible;
+                    }
+
+                    row.style.display = matchesFilter ? "" : "none";
+                });
+
+                cards.forEach(card => {
+                    const isEligible = card.getAttribute("data-eligible") === "true";
+                    let matchesFilter = true;
+
+                    if (currentFilter === "eligible") {
+                        matchesFilter = isEligible;
+                    } else if (currentFilter === "shortage") {
+                        matchesFilter = !isEligible;
+                    }
+
+                    card.style.display = matchesFilter ? "" : "none";
+                });
+            }
+
+            filterTabs.forEach(tab => {
+                tab.addEventListener("click", function () {
+                    filterTabs.forEach(t => t.classList.remove("active"));
+                    this.classList.add("active");
+                    currentFilter = this.getAttribute("data-filter");
+                    applyFilters();
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

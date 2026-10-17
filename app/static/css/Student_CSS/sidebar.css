@@ -1,0 +1,276 @@
+/* =====================================================
+   GOOGLE FONT
+===================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+
+/* =====================================================
+   RESET
+===================================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+
+/* =====================================================
+   SIDEBAR
+===================================================== */
+
+.sidebar{
+
+    width:260px;
+
+    background:linear-gradient(
+        180deg,
+        #6C63FF,
+        #5B3DF5
+    );
+
+    color:#fff;
+
+    display:flex;
+    flex-direction:column;
+
+    padding:30px 22px;
+
+    position:fixed;
+
+    left:0;
+    top:0;
+    bottom:0;
+
+    height:100vh;
+
+}
+
+
+/* =====================================================
+   LOGO
+===================================================== */
+
+.logo{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+    margin-bottom:55px;
+
+}
+
+
+.logo-icon{
+
+    width:55px;
+    height:55px;
+
+    background:rgba(255,255,255,.15);
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    border-radius:16px;
+
+    font-size:24px;
+
+}
+
+
+.logo h2{
+
+    font-size:22px;
+
+    font-weight:700;
+
+}
+
+
+.logo span{
+
+    font-size:12px;
+
+    opacity:.8;
+
+}
+
+
+/* =====================================================
+   MENU
+===================================================== */
+
+.menu{
+
+    list-style:none;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:8px;
+
+    margin:0;
+    padding:0;
+
+    flex:none;
+
+}
+
+
+.menu li{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+    padding:15px 18px;
+
+    border-radius:14px;
+
+    margin:0;
+
+    transition:.3s;
+
+    cursor:pointer;
+
+}
+
+
+.menu li i{
+
+    font-size:20px;
+
+}
+
+
+.menu li:hover{
+
+    background:rgba(255,255,255,.12);
+
+}
+
+
+.menu .active{
+
+    background:#fff;
+
+    color:#5B3DF5;
+
+    font-weight:600;
+
+}
+
+
+/* =====================================================
+   SMART ANALYTICS
+===================================================== */
+
+.sidebar-illustration{
+
+    margin-top:auto;
+
+    text-align:center;
+
+    background:rgba(255,255,255,0.12);
+
+    padding:20px;
+
+    border-radius:22px;
+
+    flex-shrink:0;
+
+}
+
+
+.sidebar-illustration img{
+
+    width:95px;
+    height:95px;
+
+    object-fit:contain;
+
+    margin-bottom:8px;
+
+}
+
+
+.sidebar-illustration h4{
+
+    color:white;
+
+    font-size:17px;
+
+    margin-bottom:0;
+
+}
+
+
+.sidebar-illustration p{
+
+    color:rgba(255,255,255,.8);
+
+    font-size:12px;
+
+    line-height:1.5;
+
+}
+
+
+/* =====================================================
+   SIDEBAR SPACING
+===================================================== */
+
+.sidebar{
+
+    justify-content:flex-start;
+
+}
+
+
+.sidebar-illustration{
+
+    margin-top:auto;
+
+}
+
+
+/* =====================================================
+   SIDEBAR ANIMATION
+===================================================== */
+
+@keyframes fadeLeft{
+
+    from{
+
+        opacity:0;
+
+        transform:translateX(-25px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateX(0);
+
+    }
+
+}
+
+
+.sidebar{
+
+    animation:fadeLeft .8s ease;
+
+}

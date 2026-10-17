@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Prediction | StudentIQ</title>
+
+
+    <!-- ================= BOOTSTRAP ICONS ================= -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    >
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+          href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet"
+>
+
+    <!-- ================= SIDEBAR CSS ================= -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/Student_CSS/sidebar.css') }}"
+    >
+
+
+    <!-- ================= PREDICTION CSS ================= -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/Student_CSS/prediction.css') }}"
+    >
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    {% include 'Student/sidebar.html' %}
+
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
+
+    <main class="main-content">
+
+
+        <!-- =================================================
+             PAGE HEADER
+        ================================================== -->
+
+        <div class="prediction-header">
+
+            <div>
+
+                <h1>Performance Prediction</h1>
+
+                <p>
+                    Predict a student's academic performance using
+                    predictive analytics.
+                </p>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             PREDICTION SECTION
+        ================================================== -->
+
+        <div class="prediction-layout">
+
+
+            <!-- =============================================
+                 INPUT CARD
+            ============================================== -->
+
+            <div class="prediction-card input-card">
+
+
+                <!-- Card Header -->
+
+                <div class="card-heading">
+
+                    <div class="heading-icon">
+
+                        <i class="bi bi-sliders"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h2>Prediction Input</h2>
+
+                        <p>
+                            Enter the student's performance details
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Prediction Form -->
+
+                <form id="predictionForm">
+
+
+                    <!-- Student -->
+
+                    <div class="form-group">
+
+                        <label for="student">
+                            Select Student
+                        </label>
+
+                        <select
+                            id="student"
+                            name="student"
+                            required
+                        >
+                            <option value="{{ student.id }}" selected>
+                                {{ student.name }} (You) - {{ student.department }}
+                            </option>
+                            {% for p in peers %}
+                                {% if p.id != student.id %}
+                                <option value="{{ p.id }}">
+                                    {{ p.name }} - {{ p.department }}
+                                </option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+
+                    </div>
+
+
+
+                    <!-- Attendance + Study Hours -->
+
+                    <div class="form-row">
+
+
+                        <!-- Attendance -->
+
+                        <div class="form-group">
+
+                            <label for="attendance">
+                                Attendance
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <input
+                                    type="number"
+                                    id="attendance"
+                                    name="attendance"
+                                    placeholder="85"
+                                    min="0"
+                                    max="100"
+                                    value="{{ avg_att|round(0)|int }}"
+                                    required
+                                >
+
+                                <span>%</span>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- Study Hours -->
+
+                        <div class="form-group">
+
+                            <label for="studyHours">
+                                Study Hours / Day
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <input
+                                    type="number"
+                                    id="studyHours"
+                                    name="studyHours"
+                                    placeholder="4"
+                                    min="0"
+                                    max="24"
+                                    step="0.5"
+                                    value="4"
+                                    required
+                                >
+
+                                <span>hrs</span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- Previous Marks + Assignment -->
+
+                    <div class="form-row">
+
+
+                        <!-- Previous Marks -->
+
+                        <div class="form-group">
+
+                            <label for="previousMarks">
+                                Previous Marks
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <input
+                                    type="number"
+                                    id="previousMarks"
+                                    name="previousMarks"
+                                    placeholder="78"
+                                    min="0"
+                                    max="100"
+                                    value="{{ avg_marks|round(0)|int }}"
+                                    required
+                                >
+
+                                <span>%</span>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- Assignment Score -->
+
+                        <div class="form-group">
+
+                            <label for="assignment">
+                                Assignment Score
+                            </label>
+
+                            <div class="input-wrapper">
+
+                                <input
+                                    type="number"
+                                    id="assignment"
+                                    name="assignment"
+                                    placeholder="80"
+                                    min="0"
+                                    max="100"
+                                    value="82"
+                                    required
+                                >
+
+                                <span>%</span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- Class Participation -->
+
+                    <div class="form-group">
+
+                        <label for="participation">
+                            Class Participation
+                        </label>
+
+                        <select
+                            id="participation"
+                            name="participation"
+                            required
+                        >
+
+                            <option value="">
+                                Select participation level
+                            </option>
+
+                            <option value="high">
+                                High
+                            </option>
+
+                            <option value="medium">
+                                Medium
+                            </option>
+
+                            <option value="low">
+                                Low
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+
+                    <!-- Predict Button -->
+
+                    <button
+                        type="submit"
+                        class="predict-btn"
+                        id="predictBtn"
+                    >
+
+                        <i class="bi bi-stars"></i>
+
+                        Predict Performance
+
+                    </button>
+
+
+                </form>
+
+            </div>
+
+
+
+            <!-- =============================================
+                 RESULT CARD
+            ============================================== -->
+
+            <div class="prediction-card result-card">
+
+
+                <!-- Card Header -->
+
+                <div class="card-heading">
+
+                    <div class="heading-icon result-icon">
+
+                        <i class="bi bi-cpu-fill"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h2>Prediction Result</h2>
+
+                        <p>
+                            AI-powered performance prediction
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Prediction Score -->
+
+                <div class="score-section">
+
+                    <div class="score-circle">
+
+                        <div>
+
+                            <strong id="predictionScore">
+                                {{ latest_prediction.predicted_score|int if latest_prediction else '--' }}
+                            </strong>
+
+                            <span>%</span>
+
+                        </div>
+
+                    </div>
+
+
+                    <h3 id="predictionStatus">
+                        {{ latest_prediction.performance_level if latest_prediction else 'Awaiting Prediction' }}
+                    </h3>
+
+
+                    <p id="predictionDescription">
+                        {% if latest_prediction %}
+                        Based on recent performance indicators, this student demonstrates consistent academic progress.
+                        {% else %}
+                        Enter student details and run the prediction to see the result.
+                        {% endif %}
+                    </p>
+
+                </div>
+
+
+
+                <!-- Risk Level -->
+
+                <div class="risk-box">
+
+                    <div class="risk-icon">
+
+                        <i class="bi bi-shield-check"></i>
+
+                    </div>
+
+                    <div>
+
+                        <span>Risk Level</span>
+
+                        <strong id="riskLevel">
+                            {{ latest_prediction.risk_level if latest_prediction else '--' }}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- AI Recommendation -->
+
+                <div class="recommendation">
+
+                    <div class="recommendation-title">
+
+                        <i class="bi bi-lightbulb-fill"></i>
+
+                        <span>AI Recommendation</span>
+
+                    </div>
+
+                    <p id="recommendationText">
+                        {% if latest_prediction %}
+                        Maintain consistent study hours and regular class attendance to achieve predicted target score.
+                        {% else %}
+                        Complete a prediction to receive personalized recommendations.
+                        {% endif %}
+                    </p>
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             PREDICTION ANALYSIS
+        ================================================== -->
+
+        <div class="analysis-card">
+
+
+            <!-- Analysis Header -->
+
+            <div class="analysis-header">
+
+                <div>
+
+                    <h2>Prediction Analysis</h2>
+
+                    <p>
+                        Key factors influencing the predicted
+                        performance
+                    </p>
+
+                </div>
+
+
+                <span class="analysis-badge">
+
+                    <i class="bi bi-stars"></i>
+
+                    AI Analysis
+
+                </span>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 FACTORS
+            ================================================== -->
+
+            <div class="factor-grid">
+
+
+                <!-- Attendance -->
+
+                <div class="factor">
+
+                    <div class="factor-top">
+
+                        <span>
+                            Attendance
+                        </span>
+
+                        <strong id="attendanceFactor">
+                            --
+                        </strong>
+
+                    </div>
+
+
+                    <div class="progress">
+
+                        <div
+                            class="progress-bar"
+                            id="attendanceBar"
+                            style="width: 0%;"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Study Hours -->
+
+                <div class="factor">
+
+                    <div class="factor-top">
+
+                        <span>
+                            Study Hours
+                        </span>
+
+                        <strong id="studyFactor">
+                            --
+                        </strong>
+
+                    </div>
+
+
+                    <div class="progress">
+
+                        <div
+                            class="progress-bar"
+                            id="studyBar"
+                            style="width: 0%;"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Previous Marks -->
+
+                <div class="factor">
+
+                    <div class="factor-top">
+
+                        <span>
+                            Previous Marks
+                        </span>
+
+                        <strong id="marksFactor">
+                            --
+                        </strong>
+
+                    </div>
+
+
+                    <div class="progress">
+
+                        <div
+                            class="progress-bar"
+                            id="marksBar"
+                            style="width: 0%;"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Assignment -->
+
+                <div class="factor">
+
+                    <div class="factor-top">
+
+                        <span>
+                            Assignment Score
+                        </span>
+
+                        <strong id="assignmentFactor">
+                            --
+                        </strong>
+
+                    </div>
+
+
+                    <div class="progress">
+
+                        <div
+                            class="progress-bar"
+                            id="assignmentBar"
+                            style="width: 0%;"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+
+    <!-- =====================================================
+         PREDICTION JAVASCRIPT
+    ====================================================== -->
+
+    <script
+        src="{{ url_for('static', filename='js/prediction.js') }}">
+    </script>
+
+
+</body>
+
+</html>

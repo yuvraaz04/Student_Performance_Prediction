@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Analytics & Insights | StudentIQ</title>
+
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+
+    <!-- Teacher Sidebar CSS -->
+    <link rel="stylesheet"
+          href="{{ url_for('static',
+          filename='css/Teacher_CSS/teacher_sidebar.css') }}">
+
+
+    <!-- Analytics CSS -->
+    <link rel="stylesheet"
+          href="{{ url_for('static',
+          filename='css/Teacher_CSS/teacher_analytics.css') }}">
+
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+
+<body>
+
+
+<div class="teacher-layout">
+
+
+    <!-- =====================================================
+         TEACHER SIDEBAR
+    ====================================================== -->
+
+    {% include 'Teacher/teacher_sidebar.html' %}
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
+
+    <main class="teacher-main">
+
+
+        <!-- TOP BAR -->
+
+        <header class="topbar">
+
+            <div class="search-box">
+
+                <i class="bi bi-search"></i>
+
+                <input
+                    type="text"
+                    id="analyticsSearchInput"
+                    placeholder="Search students, classes, records..."
+                >
+
+            </div>
+
+
+            <div class="topbar-right">
+
+                <div class="teacher-profile">
+
+                    <div class="teacher-avatar" style="overflow: hidden; border-radius: 50%;">
+                        {% if current_avatar %}
+                            <img src="{{ current_avatar }}" alt="Faculty" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% elif teacher and teacher.profile_pic %}
+                            <img src="{{ url_for('static', filename=teacher.profile_pic) }}" alt="Faculty" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            <i class="bi bi-person"></i>
+                        {% endif %}
+                    </div>
+
+
+                    <div class="teacher-info">
+
+                        <strong>{{ teacher.name if teacher else "Faculty" }}</strong>
+
+                        <span>{{ teacher.department if teacher and teacher.department else "Faculty Member" }}</span>
+
+                    </div>
+
+
+                    <i class="bi bi-chevron-down profile-arrow"></i>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- PAGE HEADING -->
+
+        <section class="page-heading">
+
+            <div>
+
+                <h1>Analytics & Insights</h1>
+
+                <p>
+                    Analyze student performance and identify
+                    important academic trends.
+                </p>
+
+            </div>
+
+
+            <div class="analytics-actions">
+
+                <select class="period-select">
+
+                    <option>This Semester</option>
+
+                    <option>This Month</option>
+
+                    <option>Last Semester</option>
+
+                    <option>This Year</option>
+
+                </select>
+
+
+                <button class="primary-btn">
+
+                    <i class="bi bi-download"></i>
+
+                    Export Report
+
+                </button>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             KPI CARDS
+        ================================================== -->
+
+        <section class="analytics-kpi-grid">
+
+
+            <!-- Average Performance -->
+
+            <div class="analytics-kpi-card">
+
+                <div class="analytics-kpi-top">
+
+                    <div class="analytics-kpi-icon purple">
+
+                        <i class="bi bi-graph-up-arrow"></i>
+
+                    </div>
+
+
+                    <span class="analytics-trend positive">
+
+                        <i class="bi bi-database"></i>
+
+                        Live
+
+                    </span>
+
+                </div>
+
+
+                <div class="analytics-kpi-value">
+
+                    {{ average_performance|round(0)|int }}%
+
+                </div>
+
+
+                <div class="analytics-kpi-title">
+
+                    Average Performance
+
+                </div>
+
+
+                <div class="analytics-kpi-subtitle">
+
+                    Based on academic records
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Attendance -->
+
+            <div class="analytics-kpi-card">
+
+                <div class="analytics-kpi-top">
+
+                    <div class="analytics-kpi-icon blue">
+
+                        <i class="bi bi-calendar-check"></i>
+
+                    </div>
+
+
+                    <span class="analytics-trend positive">
+
+                        <i class="bi bi-database"></i>
+
+                        Live
+
+                    </span>
+
+                </div>
+
+
+                <div class="analytics-kpi-value">
+
+                    {{ average_attendance|round(0)|int }}%
+
+                </div>
+
+
+                <div class="analytics-kpi-title">
+
+                    Average Attendance
+
+                </div>
+
+
+                <div class="analytics-kpi-subtitle">
+
+                    Across all students
+
+                </div>
+
+            </div>
+
+
+
+            <!-- At Risk -->
+
+            <div class="analytics-kpi-card">
+
+                <div class="analytics-kpi-top">
+
+                    <div class="analytics-kpi-icon red">
+
+                        <i class="bi bi-exclamation-triangle"></i>
+
+                    </div>
+
+
+                    <span class="analytics-trend negative">
+
+                        Needs attention
+
+                    </span>
+
+                </div>
+
+
+                <div class="analytics-kpi-value">
+
+                    {{ high_risk }}
+
+                </div>
+
+
+                <div class="analytics-kpi-title">
+
+                    At-Risk Students
+
+                </div>
+
+
+                <div class="analytics-kpi-subtitle">
+
+                    Average performance below 50%
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Evaluations -->
+
+            <div class="analytics-kpi-card">
+
+                <div class="analytics-kpi-top">
+
+                    <div class="analytics-kpi-icon yellow">
+
+                        <i class="bi bi-clipboard-check"></i>
+
+                    </div>
+
+
+                    <span class="analytics-trend positive">
+
+                        {{ completed_evaluations }} completed
+
+                    </span>
+
+                </div>
+
+
+                <div class="analytics-kpi-value">
+
+                    {{ completed_evaluations }}/{{ total_students }}
+
+                </div>
+
+
+                <div class="analytics-kpi-title">
+
+                    Evaluations Completed
+
+                </div>
+
+
+                <div class="analytics-kpi-subtitle">
+
+                    {{ pending_evaluations }} pending
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             PERFORMANCE + RISK
+        ================================================== -->
+
+        <section class="analytics-grid">
+
+
+            <!-- Performance -->
+
+            <div class="analytics-card performance-trend-card">
+
+
+                <div class="analytics-card-header">
+
+                    <div>
+
+                        <h3>Performance Overview</h3>
+
+                        <p>
+                            Average performance by semester
+                        </p>
+
+                    </div>
+
+
+                    <span class="chart-select">
+
+                        Database
+
+                    </span>
+
+                </div>
+
+
+                <div class="large-chart">
+
+                    <canvas id="performanceTrendChart"></canvas>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Risk Distribution -->
+
+            <div class="analytics-card risk-card">
+
+
+                <div class="analytics-card-header">
+
+                    <div>
+
+                        <h3>Student Risk Distribution</h3>
+
+                        <p>
+                            Current academic risk levels
+                        </p>
+
+                    </div>
+
+
+                    <button class="more-btn">
+
+                        <i class="bi bi-three-dots"></i>
+
+                    </button>
+
+                </div>
+
+
+
+                <div class="risk-chart-wrapper">
+
+                    <div class="risk-donut">
+
+                        <canvas id="riskDistributionChart"></canvas>
+
+
+                        <div class="risk-donut-center">
+
+                            <strong>
+                                {{ total_students }}
+                            </strong>
+
+                            <span>Students</span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="risk-legend">
+
+
+                    <div class="risk-legend-item">
+
+                        <span class="risk-dot high"></span>
+
+                        <span>High Risk</span>
+
+                        <strong>{{ high_risk }}</strong>
+
+                    </div>
+
+
+                    <div class="risk-legend-item">
+
+                        <span class="risk-dot medium"></span>
+
+                        <span>Medium Risk</span>
+
+                        <strong>{{ medium_risk }}</strong>
+
+                    </div>
+
+
+                    <div class="risk-legend-item">
+
+                        <span class="risk-dot low"></span>
+
+                        <span>Low Risk</span>
+
+                        <strong>{{ low_risk }}</strong>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             CLASS PERFORMANCE + SUBJECT PERFORMANCE
+        ================================================== -->
+
+        <section class="analytics-grid lower-analytics-grid">
+
+
+            <!-- Class Comparison -->
+
+            <div class="analytics-card">
+
+
+                <div class="analytics-card-header">
+
+                    <div>
+
+                        <h3>Class Performance Comparison</h3>
+
+                        <p>
+                            Average performance by semester
+                        </p>
+
+                    </div>
+
+
+                    <button class="more-btn">
+
+                        <i class="bi bi-three-dots"></i>
+
+                    </button>
+
+                </div>
+
+
+                <div class="medium-chart">
+
+                    <canvas id="classComparisonChart"></canvas>
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- Subject Performance -->
+
+            <div class="analytics-card">
+
+
+                <div class="analytics-card-header">
+
+                    <div>
+
+                        <h3>Subject Performance</h3>
+
+                        <p>
+                            Average score by subject
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="subject-list">
+
+                    {% for i in range(subject_labels|length) %}
+
+                    <div class="subject-item">
+
+
+                        <div class="subject-info">
+
+                            <span>
+                                {{ subject_labels[i] }}
+                            </span>
+
+                            <strong>
+                                {{ subject_values[i]|round(0)|int }}%
+                            </strong>
+
+                        </div>
+
+
+                        <div class="subject-progress">
+
+                            <div
+                                class="subject-progress-fill"
+                                style="width:{{ subject_values[i] }}%;">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    {% else %}
+
+                    <p>No academic records available.</p>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             INSIGHTS
+        ================================================== -->
+
+        <section class="analytics-card insights-card">
+
+
+            <div class="analytics-card-header">
+
+                <div>
+
+                    <h3>Key Insights</h3>
+
+                    <p>
+                        Important observations based on current data
+                    </p>
+
+                </div>
+
+
+                <span class="insight-status">
+
+                    <i class="bi bi-stars"></i>
+
+                    Data Insights
+
+                </span>
+
+            </div>
+
+
+
+            <div class="insights-grid">
+
+
+                <!-- Performance -->
+
+                <div class="insight-item">
+
+                    <div class="insight-icon positive">
+
+                        <i class="bi bi-graph-up-arrow"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <strong>
+                            Overall performance
+                        </strong>
+
+                        <p>
+
+                            The current average student performance
+                            is {{ average_performance|round(0)|int }}%.
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Risk -->
+
+                <div class="insight-item">
+
+                    <div class="insight-icon warning">
+
+                        <i class="bi bi-exclamation-triangle"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <strong>
+                            {{ high_risk }} students need attention
+                        </strong>
+
+                        <p>
+
+                            Students with average marks below
+                            50% are classified as high risk.
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Attendance -->
+
+                <div class="insight-item">
+
+                    <div class="insight-icon info">
+
+                        <i class="bi bi-calendar-check"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <strong>
+                            Attendance overview
+                        </strong>
+
+                        <p>
+
+                            Average attendance across students
+                            is {{ average_attendance|round(0)|int }}%.
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Evaluation -->
+
+                <div class="insight-item">
+
+                    <div class="insight-icon success">
+
+                        <i class="bi bi-clipboard-check"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <strong>
+                            Evaluation progress
+                        </strong>
+
+                        <p>
+
+                            {{ completed_evaluations }} out of
+                            {{ total_students }} students have
+                            received teacher feedback.
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- FOOTER -->
+
+        <div class="analytics-footer">
+
+            <span>
+                StudentIQ Analytics
+            </span>
+
+            <span>
+                Data-driven student performance insights
+            </span>
+
+        </div>
+
+
+    </main>
+
+</div>
+
+
+
+<!-- =====================================================
+     CHARTS
+====================================================== -->
+<div
+    id="analyticsData"
+    data-semester-labels="{{ class_labels|join(',') }}"
+    data-semester-values="{{ class_values|join(',') }}"
+    data-high-risk="{{ high_risk }}"
+    data-medium-risk="{{ medium_risk }}"
+    data-low-risk="{{ low_risk }}">
+</div>
+
+<script>
+/* =====================================================
+   SEMESTER PERFORMANCE DATA
+===================================================== */
+
+/* =====================================================
+   PERFORMANCE OVERVIEW CHART
+===================================================== */
+
+
+/* =====================================================
+   GET ANALYTICS DATA
+===================================================== */
+
+const analyticsData = document.getElementById("analyticsData");
+
+const semesterLabels =
+    analyticsData.dataset.semesterLabels
+        ? analyticsData.dataset.semesterLabels.split(",")
+        : [];
+
+const semesterValues =
+    analyticsData.dataset.semesterValues
+        ? analyticsData.dataset.semesterValues
+            .split(",")
+            .map(Number)
+        : [];
+
+const highRisk =
+    Number(analyticsData.dataset.highRisk) || 0;
+
+const mediumRisk =
+    Number(analyticsData.dataset.mediumRisk) || 0;
+
+const lowRisk =
+    Number(analyticsData.dataset.lowRisk) || 0;
+
+
+/* =====================================================
+   PERFORMANCE OVERVIEW
+===================================================== */
+
+const performanceTrendCtx =
+    document.getElementById("performanceTrendChart");
+
+if (performanceTrendCtx) {
+
+    new Chart(performanceTrendCtx, {
+
+        type: "line",
+
+        data: {
+
+            labels: semesterLabels,
+
+            datasets: [{
+
+                label: "Average Performance",
+
+                data: semesterValues,
+
+                borderWidth: 3,
+
+                tension: 0.4,
+
+                fill: false,
+
+                pointRadius: 5,
+
+                pointHoverRadius: 7
+
+            }]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            plugins: {
+
+                legend: {
+                    display: false
+                }
+
+            },
+
+            scales: {
+
+                y: {
+
+                    min: 0,
+
+                    max: 100,
+
+                    ticks: {
+                        stepSize: 10
+                    },
+
+                    grid: {
+                        drawBorder: false
+                    }
+
+                },
+
+                x: {
+
+                    grid: {
+                        display: false
+                    }
+
+                }
+
+            }
+
+        }
+
+    });
+
+}
+
+
+/* =====================================================
+   RISK DISTRIBUTION
+===================================================== */
+
+const riskDistributionCtx =
+    document.getElementById("riskDistributionChart");
+
+if (riskDistributionCtx) {
+
+    new Chart(riskDistributionCtx, {
+
+        type: "doughnut",
+
+        data: {
+
+            labels: [
+                "High Risk",
+                "Medium Risk",
+                "Low Risk"
+            ],
+
+            datasets: [{
+
+                data: [
+                    highRisk,
+                    mediumRisk,
+                    lowRisk
+                ],
+
+                borderWidth: 0,
+
+                cutout: "72%"
+
+            }]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: true,
+
+            plugins: {
+
+                legend: {
+                    display: false
+                }
+
+            }
+
+        }
+
+    });
+
+}
+
+
+/* =====================================================
+   CLASS / SEMESTER COMPARISON
+===================================================== */
+
+const classComparisonCtx =
+    document.getElementById("classComparisonChart");
+
+if (classComparisonCtx) {
+
+    new Chart(classComparisonCtx, {
+
+        type: "bar",
+
+        data: {
+
+            labels: semesterLabels,
+
+            datasets: [{
+
+                label: "Average Performance",
+
+                data: semesterValues,
+
+                borderRadius: 7,
+
+                barThickness: 40
+
+            }]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            plugins: {
+
+                legend: {
+                    display: false
+                }
+
+            },
+
+            scales: {
+
+                y: {
+
+                    beginAtZero: true,
+
+                    max: 100,
+
+                    ticks: {
+                        stepSize: 20
+                    },
+
+                    grid: {
+                        drawBorder: false
+                    }
+
+                },
+
+                x: {
+
+                    grid: {
+                        display: false
+                    }
+
+                }
+
+            }
+
+        }
+
+    });
+
+}
+
+// Search input handling for Analytics & Insights
+const analyticsSearch = document.getElementById("analyticsSearchInput");
+if (analyticsSearch) {
+    analyticsSearch.addEventListener("input", function() {
+        const query = analyticsSearch.value.trim().toLowerCase();
+
+        // Filter subject items
+        const subjects = document.querySelectorAll(".subject-list .subject-item");
+        subjects.forEach(item => {
+            const text = item.innerText.toLowerCase();
+            item.style.display = (!query || text.includes(query)) ? "flex" : "none";
+        });
+
+        // Filter insight items
+        const insights = document.querySelectorAll(".insights-list .insight-item");
+        insights.forEach(item => {
+            const text = item.innerText.toLowerCase();
+            item.style.display = (!query || text.includes(query)) ? "flex" : "none";
+        });
+    });
+}
+
+</script>
+
+</body>
+
+</html>

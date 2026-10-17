@@ -1,0 +1,1133 @@
+/* =========================================================
+   TEACHER ANALYTICS & INSIGHTS
+   ========================================================= */
+
+
+/* =========================================================
+   GOOGLE FONT
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+
+/* =========================================================
+   RESET
+   ========================================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #f7f8fc;
+    color: #20202e;
+}
+
+
+/* =========================================================
+   MAIN LAYOUT
+   ========================================================= */
+
+.teacher-layout {
+    min-height: 100vh;
+}
+
+
+/*
+   IMPORTANT:
+   Sidebar is fixed at 260px.
+   Main content therefore starts after 260px.
+*/
+
+.teacher-main {
+    margin-left: 260px;
+    min-height: 100vh;
+
+    padding: 0 28px 40px;
+
+    background: #f7f8fc;
+
+    min-width: 0;
+}
+
+
+/* =========================================================
+   TOP BAR
+   ========================================================= */
+
+.topbar {
+    height: 76px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 25px;
+}
+
+
+/* =========================================================
+   SEARCH
+   ========================================================= */
+
+.search-box {
+    width: 390px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 0 14px;
+
+    background: #ffffff;
+
+    border: 1px solid #e8e9f0;
+
+    border-radius: 10px;
+
+    color: #9295a5;
+}
+
+.search-box i {
+    font-size: 17px;
+}
+
+.search-box input {
+    width: 100%;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    font-family: 'Poppins', sans-serif;
+
+    font-size: 12px;
+
+    color: #333;
+}
+
+.search-box input::placeholder {
+    color: #a2a4b0;
+}
+
+
+/* =========================================================
+   TOPBAR RIGHT
+   ========================================================= */
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+
+    gap: 15px;
+}
+
+
+/* =========================================================
+   ICON BUTTON
+   ========================================================= */
+
+.icon-btn {
+    position: relative;
+
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #e9e9f0;
+
+    border-radius: 10px;
+
+    background: #ffffff;
+
+    color: #55586b;
+
+    cursor: pointer;
+
+    font-size: 17px;
+
+    transition: 0.2s ease;
+}
+
+.icon-btn:hover {
+    background: #f5f3ff;
+    color: #5b3df5;
+}
+
+
+/* Notification */
+
+.notification-dot {
+    position: absolute;
+
+    width: 7px;
+    height: 7px;
+
+    top: 7px;
+    right: 8px;
+
+    border-radius: 50%;
+
+    background: #ff5a68;
+}
+
+
+/* =========================================================
+   TEACHER PROFILE
+   ========================================================= */
+
+.teacher-profile {
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    padding-left: 8px;
+
+    cursor: pointer;
+}
+
+.teacher-avatar {
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #ece8ff;
+
+    color: #5b3df5;
+
+    font-size: 19px;
+}
+
+.teacher-info {
+    display: flex;
+    flex-direction: column;
+
+    gap: 2px;
+}
+
+.teacher-info strong {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.teacher-info span {
+    font-size: 11px;
+    color: #9294a3;
+}
+
+.profile-arrow {
+    margin-left: 4px;
+
+    font-size: 11px;
+
+    color: #8d8f9d;
+}
+
+
+/* =========================================================
+   PAGE HEADING
+   ========================================================= */
+
+.page-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    margin-bottom: 20px;
+}
+
+.page-heading h1 {
+    font-size: 24px;
+
+    font-weight: 700;
+
+    color: #20202e;
+
+    margin-bottom: 5px;
+}
+
+.page-heading p {
+    font-size: 12px;
+
+    color: #8a8d9c;
+}
+
+
+/* =========================================================
+   ANALYTICS ACTIONS
+   ========================================================= */
+
+.analytics-actions {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+}
+
+.period-select {
+    height: 40px;
+
+    padding: 0 12px;
+
+    border: 1px solid #e4e4ec;
+
+    border-radius: 9px;
+
+    outline: none;
+
+    background: #ffffff;
+
+    color: #686a79;
+
+    font-family: 'Poppins', sans-serif;
+
+    font-size: 11px;
+
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   PRIMARY BUTTON
+   ========================================================= */
+
+.primary-btn {
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 0 15px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    background: #5b3df5;
+
+    color: #ffffff;
+
+    font-family: 'Poppins', sans-serif;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 5px 15px rgba(91, 61, 245, 0.18);
+
+    transition: 0.2s ease;
+}
+
+.primary-btn:hover {
+    background: #4e31e4;
+
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   KPI GRID
+   ========================================================= */
+
+.analytics-kpi-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 15px;
+
+    margin-bottom: 18px;
+}
+
+
+/* =========================================================
+   KPI CARD
+   ========================================================= */
+
+.analytics-kpi-card {
+    min-height: 140px;
+
+    padding: 17px 18px;
+
+    background: #ffffff;
+
+    border: 1px solid #e9e9f0;
+
+    border-radius: 13px;
+
+    box-shadow:
+        0 5px 20px rgba(35, 34, 60, 0.025);
+}
+
+
+/* =========================================================
+   KPI TOP
+   ========================================================= */
+
+.analytics-kpi-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 12px;
+}
+
+
+/* =========================================================
+   KPI ICON
+   ========================================================= */
+
+.analytics-kpi-icon {
+    width: 35px;
+    height: 35px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 9px;
+
+    font-size: 16px;
+}
+
+.analytics-kpi-icon.purple {
+    background: #eeeaff;
+    color: #6547e8;
+}
+
+.analytics-kpi-icon.blue {
+    background: #e8f1ff;
+    color: #2878e9;
+}
+
+.analytics-kpi-icon.red {
+    background: #ffebed;
+    color: #e95663;
+}
+
+.analytics-kpi-icon.yellow {
+    background: #fff5db;
+    color: #d69a1d;
+}
+
+
+/* =========================================================
+   KPI TREND
+   ========================================================= */
+
+.analytics-trend {
+    font-size: 10px;
+
+    font-weight: 600;
+}
+
+.analytics-trend.positive {
+    color: #24a36b;
+}
+
+.analytics-trend.negative {
+    color: #e85663;
+}
+
+
+/* =========================================================
+   KPI VALUE
+   ========================================================= */
+
+.analytics-kpi-value {
+    font-size: 25px;
+
+    font-weight: 700;
+
+    line-height: 1;
+
+    margin-bottom: 6px;
+
+    color: #242535;
+}
+
+
+/* =========================================================
+   KPI TITLE
+   ========================================================= */
+
+.analytics-kpi-title {
+    font-size: 12px;
+
+    font-weight: 600;
+
+    color: #454756;
+
+    margin-bottom: 4px;
+}
+
+.analytics-kpi-subtitle {
+    font-size: 10px;
+
+    color: #9b9daa;
+}
+
+
+/* =========================================================
+   ANALYTICS GRID
+   ========================================================= */
+
+.analytics-grid {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1.7fr)
+        minmax(290px, 1fr);
+
+    gap: 16px;
+
+    margin-bottom: 16px;
+}
+
+
+/* =========================================================
+   LOWER ANALYTICS GRID
+   ========================================================= */
+
+.lower-analytics-grid {
+    grid-template-columns:
+        minmax(0, 1.35fr)
+        minmax(320px, 1fr);
+}
+
+
+/* =========================================================
+   ANALYTICS CARD
+   ========================================================= */
+
+.analytics-card {
+    background: #ffffff;
+
+    border: 1px solid #e9e9f0;
+
+    border-radius: 13px;
+
+    padding: 18px;
+
+    box-shadow:
+        0 5px 20px rgba(35, 34, 60, 0.025);
+}
+
+
+/* =========================================================
+   CARD HEADER
+   ========================================================= */
+
+.analytics-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 15px;
+
+    margin-bottom: 17px;
+}
+
+.analytics-card-header h3 {
+    font-size: 14px;
+
+    font-weight: 700;
+
+    color: #292a39;
+
+    margin-bottom: 4px;
+}
+
+.analytics-card-header p {
+    font-size: 10px;
+
+    color: #9a9ca9;
+}
+
+
+/* =========================================================
+   SELECT
+   ========================================================= */
+
+.chart-select {
+    height: 32px;
+
+    padding: 0 9px;
+
+    border: 1px solid #e5e5ec;
+
+    border-radius: 7px;
+
+    outline: none;
+
+    background: #ffffff;
+
+    color: #6f7180;
+
+    font-family: 'Poppins', sans-serif;
+
+    font-size: 10px;
+
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   MORE BUTTON
+   ========================================================= */
+
+.more-btn {
+    width: 30px;
+    height: 30px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+
+    background: #f7f7fb;
+
+    color: #777987;
+
+    border-radius: 7px;
+
+    cursor: pointer;
+}
+
+.more-btn:hover {
+    background: #f0edff;
+
+    color: #5b3df5;
+}
+
+
+/* =========================================================
+   PERFORMANCE TREND CHART
+   ========================================================= */
+
+.performance-trend-card {
+    min-height: 350px;
+}
+
+.large-chart {
+    height: 265px;
+
+    position: relative;
+}
+
+
+/* =========================================================
+   RISK CARD
+   ========================================================= */
+
+.risk-card {
+    min-height: 350px;
+}
+
+
+/* =========================================================
+   RISK DONUT
+   ========================================================= */
+
+.risk-chart-wrapper {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    margin-top: 3px;
+}
+
+.risk-donut {
+    width: 170px;
+    height: 170px;
+
+    position: relative;
+}
+
+.risk-donut-center {
+    position: absolute;
+
+    inset: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+}
+
+.risk-donut-center strong {
+    font-size: 27px;
+
+    color: #242535;
+}
+
+.risk-donut-center span {
+    font-size: 10px;
+
+    color: #999ba7;
+}
+
+
+/* =========================================================
+   RISK LEGEND
+   ========================================================= */
+
+.risk-legend {
+    margin-top: 12px;
+}
+
+.risk-legend-item {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 5px 0;
+
+    font-size: 10px;
+
+    color: #767887;
+}
+
+.risk-legend-item strong {
+    margin-left: auto;
+
+    color: #333442;
+
+    font-weight: 600;
+}
+
+
+/* Risk dots */
+
+.risk-dot {
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+}
+
+.risk-dot.high {
+    background: #e85663;
+}
+
+.risk-dot.medium {
+    background: #d69a1d;
+}
+
+.risk-dot.low {
+    background: #5b3df5;
+}
+
+
+/* =========================================================
+   CLASS COMPARISON CHART
+   ========================================================= */
+
+.medium-chart {
+    height: 235px;
+
+    position: relative;
+}
+
+
+/* =========================================================
+   SUBJECT PERFORMANCE
+   ========================================================= */
+
+.subject-list {
+    display: flex;
+    flex-direction: column;
+
+    gap: 17px;
+
+    padding-top: 4px;
+}
+
+.subject-item {
+    width: 100%;
+}
+
+.subject-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 7px;
+}
+
+.subject-info span {
+    font-size: 10px;
+
+    color: #666876;
+}
+
+.subject-info strong {
+    font-size: 10px;
+
+    color: #383946;
+}
+
+
+/* =========================================================
+   SUBJECT PROGRESS BAR
+   ========================================================= */
+
+.subject-progress {
+    width: 100%;
+
+    height: 7px;
+
+    background: #eeeeF4;
+
+    border-radius: 20px;
+
+    overflow: hidden;
+}
+
+.subject-progress-fill {
+    height: 100%;
+
+    border-radius: inherit;
+
+    background: #5b3df5;
+}
+
+.subject-progress-fill.physics {
+    background: #5b3df5;
+}
+
+.subject-progress-fill.mathematics {
+    background: #8068e8;
+}
+
+.subject-progress-fill.computer {
+    background: #39a985;
+}
+
+.subject-progress-fill.english {
+    background: #4d8edc;
+}
+
+.subject-progress-fill.data-science {
+    background: #d39b2a;
+}
+
+
+/* =========================================================
+   INSIGHTS CARD
+   ========================================================= */
+
+.insights-card {
+    margin-bottom: 16px;
+}
+
+
+/* =========================================================
+   INSIGHT STATUS
+   ========================================================= */
+
+.insight-status {
+    display: flex;
+    align-items: center;
+
+    gap: 6px;
+
+    padding: 7px 10px;
+
+    border-radius: 20px;
+
+    background: #f0edff;
+
+    color: #5b3df5;
+
+    font-size: 9px;
+
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   INSIGHTS GRID
+   ========================================================= */
+
+.insights-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 12px;
+}
+
+
+/* =========================================================
+   INSIGHT ITEM
+   ========================================================= */
+
+.insight-item {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 12px;
+
+    padding: 14px;
+
+    border: 1px solid #eeeeF3;
+
+    border-radius: 10px;
+
+    background: #fafaff;
+}
+
+
+/* =========================================================
+   INSIGHT ICON
+   ========================================================= */
+
+.insight-icon {
+    width: 34px;
+    height: 34px;
+
+    flex: 0 0 auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 9px;
+
+    font-size: 14px;
+}
+
+.insight-icon.positive {
+    background: #e6f7f0;
+    color: #29936e;
+}
+
+.insight-icon.warning {
+    background: #fff0db;
+    color: #c58b1c;
+}
+
+.insight-icon.info {
+    background: #e8f1ff;
+    color: #3679df;
+}
+
+.insight-icon.success {
+    background: #eeeaff;
+    color: #6750df;
+}
+
+
+/* =========================================================
+   INSIGHT CONTENT
+   ========================================================= */
+
+.insight-item strong {
+    display: block;
+
+    margin-bottom: 4px;
+
+    font-size: 11px;
+
+    color: #343543;
+}
+
+.insight-item p {
+    font-size: 9px;
+
+    line-height: 1.6;
+
+    color: #8d8f9d;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.analytics-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 10px 3px;
+
+    color: #aaaab4;
+
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1200px) {
+
+    .analytics-kpi-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .analytics-grid,
+    .lower-analytics-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .teacher-main {
+        margin-left: 260px;
+
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .search-box {
+        width: 300px;
+    }
+
+    .page-heading {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .analytics-actions {
+        width: 100%;
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .teacher-main {
+        margin-left: 0;
+
+        padding: 0 16px 30px;
+    }
+
+    .topbar {
+        height: auto;
+
+        padding: 15px 0;
+
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+    .search-box {
+        width: 100%;
+    }
+
+    .topbar-right {
+        justify-content: flex-end;
+    }
+
+    .analytics-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .analytics-actions {
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+    .period-select,
+    .primary-btn {
+        width: 100%;
+
+        justify-content: center;
+    }
+
+    .insights-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .analytics-footer {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 5px;
+    }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 500px) {
+
+    .page-heading h1 {
+        font-size: 21px;
+    }
+
+    .analytics-card {
+        padding: 14px;
+    }
+
+    .analytics-card-header {
+        flex-direction: column;
+    }
+
+    .chart-select {
+        width: 100%;
+    }
+
+    .large-chart {
+        height: 220px;
+    }
+
+    .medium-chart {
+        height: 210px;
+    }
+
+}

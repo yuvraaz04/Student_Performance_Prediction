@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>Teacher Settings | StudentIQ</title>
+
+
+<!-- Google Font -->
+
+<link rel="preconnect"
+      href="https://fonts.googleapis.com">
+
+<link rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin>
+
+<link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+>
+
+
+<!-- Bootstrap Icons -->
+
+<link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+>
+
+
+<!-- Teacher Sidebar -->
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/Teacher_CSS/teacher_sidebar.css') }}"
+>
+
+
+<!-- Teacher Settings CSS -->
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/Teacher_CSS/teacher_settings.css') }}"
+>
+
+</head>
+
+<body>
+
+<!-- =====================================================
+     TEACHER SIDEBAR
+====================================================== -->
+
+{% include 'Teacher/teacher_sidebar.html' %}
+
+
+
+<!-- =====================================================
+     MAIN CONTENT
+====================================================== -->
+
+<main class="teacher-settings-main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div style="padding: 14px 20px; margin: 15px 30px; border-radius: 12px; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; background: {% if category == 'success' %}#ecfdf5; color: #065f46; border: 1px solid #a7f3d0{% elif category == 'danger' %}#fef2f2; color: #991b1b; border: 1px solid #fecaca{% else %}#fffbeb; color: #92400e; border: 1px solid #fde68a{% endif %};">
+                    <i class="bi bi-info-circle-fill"></i>
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+
+    <!-- =================================================
+         PAGE HEADER
+    ================================================== -->
+
+    <section class="teacher-settings-header">
+
+        <div>
+
+            <span class="teacher-settings-label">
+                <i class="bi bi-gear-fill"></i>
+                FACULTY SETTINGS
+            </span>
+
+            <h1>Settings</h1>
+
+            <p>
+                Manage your teacher account, preferences
+                and notification settings.
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =================================================
+         ACCOUNT CARD
+    ================================================== -->
+
+    <section class="teacher-account-card">
+
+
+        <!-- Account Top -->
+
+        <div class="teacher-account-top" style="align-items: center; flex-wrap: wrap; gap: 20px;">
+
+            <div class="teacher-account-profile" style="display: flex; align-items: center; gap: 20px;">
+
+                <div class="teacher-profile-avatar-container" style="position: relative; width: 72px; height: 72px; flex-shrink: 0;">
+                    <div class="teacher-profile-avatar" style="width: 72px; height: 72px; border-radius: 20px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #6c63ff, #5b3df5); color: white; box-shadow: 0 8px 20px rgba(108, 99, 255, 0.25);">
+                        {% if teacher and teacher.profile_pic %}
+                            <img id="teacherAvatarImg" src="{{ url_for('static', filename=teacher.profile_pic) }}" alt="{{ teacher.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            <i id="teacherAvatarIcon" class="bi bi-person-workspace" style="font-size: 34px;"></i>
+                            <img id="teacherAvatarImg" src="" alt="Avatar Preview" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                        {% endif %}
+                    </div>
+
+                    <!-- Camera badge button triggers file input -->
+                    <label for="teacherProfilePicInput" title="Change faculty photo" style="position: absolute; bottom: -4px; right: -4px; width: 28px; height: 28px; background: #6c63ff; border: 2px solid #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ffffff; cursor: pointer; font-size: 13px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); transition: transform 0.2s;">
+                        <i class="bi bi-camera-fill"></i>
+                    </label>
+                </div>
+
+                <div class="teacher-profile-details">
+
+                    <h2 id="teacherProfileName">
+                        {{ teacher["name"] }}
+                    </h2>
+
+                    <p>
+                        Faculty Account
+                    </p>
+
+                    <!-- Upload & Remove Buttons -->
+                    <div style="display: flex; gap: 10px; margin-top: 8px; align-items: center; flex-wrap: wrap;">
+                        <form id="teacherAvatarForm" method="POST" action="{{ url_for('update_teacher_profile_pic') }}" enctype="multipart/form-data" style="margin: 0; display: inline-flex; align-items: center; gap: 8px;">
+                            <input type="file" id="teacherProfilePicInput" name="profile_pic" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif" style="display: none;" onchange="handleTeacherAvatarSelect(this)">
+                            <button type="button" onclick="document.getElementById('teacherProfilePicInput').click();" style="padding: 6px 14px; font-size: 12px; font-weight: 600; border-radius: 8px; border: 1.5px solid #e2e8f0; background: #ffffff; color: #334155; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s;">
+                                <i class="bi bi-upload"></i> Upload Photo
+                            </button>
+                        </form>
+
+                        {% if teacher and teacher.profile_pic %}
+                        <form method="POST" action="{{ url_for('remove_teacher_profile_pic') }}" style="margin: 0; display: inline;">
+                            <button type="submit" onclick="return confirm('Are you sure you want to remove your profile picture?');" style="padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: 8px; border: 1.5px solid #fee2e2; background: #fef2f2; color: #dc2626; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s;">
+                                <i class="bi bi-trash3"></i> Remove
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="teacher-account-status">
+
+                <span class="teacher-status-dot"></span>
+
+                Active
+
+            </div>
+
+        </div>
+
+
+        <div class="teacher-card-divider"></div>
+
+
+        <!-- Account Form -->
+
+        <form
+            class="teacher-account-form"
+            method="POST"
+            action="{{ url_for('update_teacher_settings') }}"
+            enctype="multipart/form-data"
+        >
+
+
+            <!-- Full Name -->
+
+            <div class="teacher-form-field">
+
+                <label for="teacherFullName">
+                    Full Name
+                </label>
+
+                <div class="teacher-input-wrapper">
+
+                    <i class="bi bi-person"></i>
+
+                    <input
+                        type="text"
+                        id="teacherFullName"
+                        name="name"
+                        value="{{ teacher['name'] }}"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Email -->
+
+            <div class="teacher-form-field">
+
+                <label for="teacherEmail">
+                    Email Address
+                </label>
+
+                <div class="teacher-input-wrapper">
+
+                    <i class="bi bi-envelope"></i>
+
+                    <input
+                        type="email"
+                        id="teacherEmail"
+                        name="email"
+                        value="{{ teacher['email'] }}"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Role -->
+
+            <div class="teacher-form-field">
+
+                <label for="teacherRole">
+                    Role
+                </label>
+
+                <div class="teacher-input-wrapper">
+
+                    <i class="bi bi-person-badge"></i>
+
+                    <input
+                        type="text"
+                        id="teacherRole"
+                        value="Teacher"
+                        readonly
+                    >
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Department -->
+
+            <div class="teacher-form-field">
+
+                <label for="department">
+                    Department
+                </label>
+
+                <div class="teacher-input-wrapper">
+
+                    <i class="bi bi-building"></i>
+
+                    <input
+                        type="text"
+                        id="department"
+                        name="department"
+                        value="{{ teacher['department'] }}"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Account Status -->
+
+            <div class="teacher-form-field">
+
+                <label>
+                    Account Status
+                </label>
+
+                <div class="teacher-active-field">
+
+                    <span class="teacher-status-dot"></span>
+
+                    Account Active
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Save -->
+
+            <div class="teacher-account-actions">
+
+                <button
+                    class="teacher-save-btn"
+                    id="teacherSaveProfile"
+                    type="submit"
+                >
+
+                    <i class="bi bi-check-lg"></i>
+
+                    Save Changes
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+
+
+    <!-- =================================================
+         BOTTOM GRID
+    ================================================== -->
+
+    <section class="teacher-settings-grid">
+
+
+        <!-- =================================================
+             PREFERENCES
+        ================================================== -->
+
+        <div class="teacher-settings-card">
+
+
+            <div class="teacher-card-heading">
+
+                <div class="teacher-heading-icon purple">
+
+                    <i class="bi bi-sliders"></i>
+
+                </div>
+
+                <div>
+
+                    <h3>Preferences</h3>
+
+                    <p>
+                        Customize your teacher dashboard
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="teacher-preference-list">
+
+
+                <!-- Theme -->
+
+                <div class="teacher-preference-row">
+
+                    <div class="teacher-preference-info">
+
+                        <div class="teacher-small-icon purple">
+
+                            <i class="bi bi-palette"></i>
+
+                        </div>
+
+                        <div>
+
+                            <strong>Dashboard Theme</strong>
+
+                            <span>
+                                Use the StudentIQ default theme
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <span class="teacher-default-badge">
+                        Default
+                    </span>
+
+                </div>
+
+
+
+                <!-- Compact View -->
+
+                <div class="teacher-preference-row">
+
+                    <div class="teacher-preference-info">
+
+                        <div class="teacher-small-icon blue">
+
+                            <i class="bi bi-layout-text-window"></i>
+
+                        </div>
+
+                        <div>
+
+                            <strong>Compact View</strong>
+
+                            <span>
+                                Keep dashboard cards compact
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <label class="teacher-toggle">
+
+                        <input
+                            type="checkbox"
+                            id="teacherCompactToggle"
+                            {% if settings["compact_view"] == 1 %}checked{% endif %}
+                        >
+
+                        <span class="teacher-toggle-slider"></span>
+
+                    </label>
+
+                </div>
+
+
+
+                <!-- Student View -->
+
+                <div class="teacher-preference-row">
+
+                    <div class="teacher-preference-info">
+
+                        <div class="teacher-small-icon green">
+
+                            <i class="bi bi-people"></i>
+
+                        </div>
+
+                        <div>
+
+                            <strong>Student Overview</strong>
+
+                            <span>
+                                Show student performance summaries
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <label class="teacher-toggle">
+
+                        <input
+                            type="checkbox"
+                            id="studentOverviewToggle"
+                            {% if settings["student_overview"] == 1 %}checked{% endif %}
+                        >
+
+                        <span class="teacher-toggle-slider"></span>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             NOTIFICATIONS
+        ================================================== -->
+
+        <div class="teacher-settings-card">
+
+
+            <div class="teacher-card-heading">
+
+                <div class="teacher-heading-icon orange">
+
+                    <i class="bi bi-bell-fill"></i>
+
+                </div>
+
+                <div>
+
+                    <h3>Notifications</h3>
+
+                    <p>
+                        Control your StudentIQ alerts
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="teacher-preference-list">
+
+
+                <!-- Evaluation Alerts -->
+
+                <div class="teacher-preference-row">
+
+                    <div class="teacher-preference-info">
+
+                        <div class="teacher-small-icon orange">
+
+                            <i class="bi bi-clipboard-check"></i>
+
+                        </div>
+
+                        <div>
+
+                            <strong>Evaluation Alerts</strong>
+
+                            <span>
+                                Get reminders for pending evaluations
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <label class="teacher-toggle">
+
+                        <input
+                            type="checkbox"
+                            id="evaluationToggle"
+                            {% if settings["evaluation_alerts"] == 1 %}checked{% endif %}
+                        >
+
+                        <span class="teacher-toggle-slider"></span>
+
+                    </label>
+
+                </div>
+
+
+
+                <!-- Performance Alerts -->
+
+                <div class="teacher-preference-row">
+
+                    <div class="teacher-preference-info">
+
+                        <div class="teacher-small-icon green">
+
+                            <i class="bi bi-graph-up-arrow"></i>
+
+                        </div>
+
+                        <div>
+
+                            <strong>Performance Alerts</strong>
+
+                            <span>
+                                Get notified about student performance
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <label class="teacher-toggle">
+
+                        <input
+                            type="checkbox"
+                            id="teacherPerformanceToggle"
+                            {% if settings["performance_alerts"] == 1 %}checked{% endif %}
+                        >
+
+                        <span class="teacher-toggle-slider"></span>
+
+                    </label>
+
+                </div>
+
+
+
+                <!-- At Risk Alerts -->
+
+                <div class="teacher-preference-row">
+
+                    <div class="teacher-preference-info">
+
+                        <div class="teacher-small-icon red">
+
+                            <i class="bi bi-exclamation-triangle"></i>
+
+                        </div>
+
+                        <div>
+
+                            <strong>At-Risk Alerts</strong>
+
+                            <span>
+                                Receive alerts when students need support
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <label class="teacher-toggle">
+
+                        <input
+                            type="checkbox"
+                            id="riskAlertToggle"
+                            {% if settings["risk_alerts"] == 1 %}checked{% endif %}
+                        >
+
+                        <span class="teacher-toggle-slider"></span>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =================================================
+         SECURITY CARD
+    ================================================== -->
+
+    <section class="teacher-security-card">
+
+
+        <div class="teacher-security-left">
+
+            <div class="teacher-heading-icon red">
+
+                <i class="bi bi-shield-lock-fill"></i>
+
+            </div>
+
+
+            <div>
+
+                <h3>Security</h3>
+
+                <p>
+                    Manage your teacher account security
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="teacher-security-actions">
+
+            <button
+                class="teacher-secondary-btn"
+                id="teacherChangePasswordBtn"
+                type="button"
+            >
+
+                <i class="bi bi-key-fill"></i>
+
+                Change Password
+
+            </button>
+
+
+            <button
+                class="logout-btn"
+                id="logoutBtn"
+                type="button"
+                style="background: #dc2626; color: #ffffff !important; display: inline-flex; align-items: center; gap: 8px; justify-content: center;"
+            >
+
+                <i class="bi bi-box-arrow-right" style="color: #ffffff !important;"></i>
+
+                <span style="color: #ffffff !important;">Logout</span>
+
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- TEACHER PASSWORD MODAL -->
+    <div id="teacherPasswordModal" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif;">
+        <div style="background: white; border-radius: 16px; width: 100%; max-width: 440px; padding: 28px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0; font-size: 18px; font-weight: 600; color: #1e293b;">Change Faculty Password</h3>
+                <button type="button" onclick="document.getElementById('teacherPasswordModal').style.display='none'" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b;">&times;</button>
+            </div>
+            <form method="POST" action="{{ url_for('change_teacher_password') }}">
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Current Password</label>
+                    <input type="password" name="current_password" required style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;" placeholder="Enter current password">
+                </div>
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">New Password</label>
+                    <input type="password" name="new_password" required minlength="4" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;" placeholder="Minimum 4 characters">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Confirm New Password</label>
+                    <input type="password" name="confirm_password" required minlength="4" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;" placeholder="Repeat new password">
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" onclick="document.getElementById('teacherPasswordModal').style.display='none'" style="padding: 10px 18px; border-radius: 8px; border: 1px solid #cbd5e1; background: #f8fafc; font-weight: 500; cursor: pointer;">Cancel</button>
+                    <button type="submit" style="padding: 10px 20px; border-radius: 8px; border: none; background: #4f46e5; color: white; font-weight: 600; cursor: pointer;">Update Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</main>
+
+
+
+<!-- =====================================================
+     TEACHER SETTINGS JS
+====================================================== -->
+
+<script>
+
+
+    /* =========================================
+       CHANGE PASSWORD
+    ========================================= */
+
+    const teacherChangeBtn = document.getElementById("teacherChangePasswordBtn");
+    if (teacherChangeBtn) {
+        teacherChangeBtn.addEventListener("click", function () {
+            document.getElementById("teacherPasswordModal").style.display = "flex";
+        });
+    }
+
+
+
+    /* =========================================
+       PREFERENCE SWITCHES
+    ========================================= */
+
+    function saveTeacherPreferences() {
+
+        const form =
+            document.createElement("form");
+
+        form.method = "POST";
+
+        form.action =
+            "{{ url_for('update_teacher_preferences') }}";
+
+
+        const preferences = {
+
+            compact_view:
+                document.getElementById(
+                    "teacherCompactToggle"
+                ).checked,
+
+            student_overview:
+                document.getElementById(
+                    "studentOverviewToggle"
+                ).checked,
+
+            evaluation_alerts:
+                document.getElementById(
+                    "evaluationToggle"
+                ).checked,
+
+            performance_alerts:
+                document.getElementById(
+                    "teacherPerformanceToggle"
+                ).checked,
+
+            risk_alerts:
+                document.getElementById(
+                    "riskAlertToggle"
+                ).checked
+
+        };
+
+
+        Object.keys(preferences).forEach(function (key) {
+
+            const input =
+                document.createElement("input");
+
+            input.type = "hidden";
+
+            input.name = key;
+
+            input.value =
+                preferences[key] ? "1" : "";
+
+            form.appendChild(input);
+
+        });
+
+
+        document.body.appendChild(form);
+
+        form.submit();
+
+    }
+
+
+    document
+        .getElementById("teacherCompactToggle")
+        .addEventListener(
+            "change",
+            saveTeacherPreferences
+        );
+
+
+    document
+        .getElementById("studentOverviewToggle")
+        .addEventListener(
+            "change",
+            saveTeacherPreferences
+        );
+
+
+    document
+        .getElementById("evaluationToggle")
+        .addEventListener(
+            "change",
+            saveTeacherPreferences
+        );
+
+
+    document
+        .getElementById("teacherPerformanceToggle")
+        .addEventListener(
+            "change",
+            saveTeacherPreferences
+        );
+
+
+    document
+        .getElementById("riskAlertToggle")
+        .addEventListener(
+            "change",
+            saveTeacherPreferences
+        );
+
+
+
+    /* =========================================
+       AVATAR PREVIEW & INSTANT UPLOAD
+    ========================================= */
+    function handleTeacherAvatarSelect(input) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById('teacherAvatarImg');
+                const icon = document.getElementById('teacherAvatarIcon');
+                if (icon) icon.style.display = 'none';
+                if (img) {
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                }
+                document.getElementById('teacherAvatarForm').submit();
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+
+    /* =========================================
+       LOGOUT
+    ========================================= */
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            const logoutBtn =
+                document.getElementById("logoutBtn");
+
+            if (logoutBtn) {
+
+                logoutBtn.addEventListener(
+                    "click",
+                    function () {
+
+                        const confirmLogout =
+                            confirm(
+                                "Are you sure you want to logout?"
+                            );
+
+                        if (confirmLogout) {
+
+                            window.location.href =
+                                "{{ url_for('logout') }}";
+
+                        }
+
+                    }
+                );
+
+            }
+
+        }
+    );
+
+
+</script>
+
+</body>
+
+</html>
